@@ -327,7 +327,8 @@ sequenceDiagram
     IC-->>SSE: degraded = true
     SSE-->>U: data: {"text": "Permintaan tidak dapat diproses", "degraded": true}
     SSE-->>U: data: [DONE]
-    Note over U,DB: Serangan diblokir di Layer 2;<br/>tidak pernah mencapai LLM atau DB
+    Note over U,DB: Serangan diblokir di Layer 2
+    Note over U,DB: tidak pernah mencapai LLM atau DB
 ```
 
 ### 8.3 Lapisan 1 — `InjectionCounter` (Rate Limit + Lockout)

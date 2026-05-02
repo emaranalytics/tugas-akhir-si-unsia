@@ -309,7 +309,7 @@ graph TB
     subgraph "Layer 1: Tool Registry"
         REG[ToolRegistry singleton]
         META[ToolMeta dataclass]
-        DEC['@register decorator']
+        DEC["@register decorator"]
     end
 
     subgraph "Tool Handlers"
@@ -319,7 +319,7 @@ graph TB
     end
 
     DEC --> REG
-    H1 & H2 & H3 -.decorated by.-> DEC
+    H1 & H2 & H3 -.-> DEC
     REG --> ZT
     ZT --> FT --> PT
     PT --> AG
@@ -463,7 +463,7 @@ Untuk konteks zerlo.id (~80 tool dalam scope) deterministik **lebih dari cukup**
 ```mermaid
 graph TB
     subgraph "Tool Authoring Layer"
-        DEC['@register decorator']
+        DEC["@register decorator"]
         FN[Tool Handler Functions]
     end
 
@@ -490,7 +490,7 @@ graph TB
         GEMINI[Gemini 2.5 Flash]
     end
 
-    FN -.decorate.-> DEC
+    FN -.-> DEC
     DEC --> REG
     REG --> META
     REG --> FROZEN
