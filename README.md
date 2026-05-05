@@ -145,23 +145,26 @@ calling, S1–S3, 3 pengulangan):
 xychart-beta
     title "Rata-rata Token per Panggilan (lebih rendah = lebih baik)"
     x-axis ["S1: 30 tools", "S2: 100 tools", "S3: 300 tools"]
-    y-axis "Token" 0 --> 5500
-    bar [1520, 5002, 0]
-    bar [581, 783, 790]
+    y-axis "Token" 0 --> 25000
+    bar [2426, 7985, 23893]
+    bar [893, 1241, 1239]
 ```
 
 | Aspek | Tanpa Registry (Baseline) | Dengan Registry | Perubahan |
 |-------|--------------------------|-----------------|-----------|
-| Token S1 (30 tools) | 1.520 | 581 | **−62%** |
-| Token S2 (100 tools) | 5.002 | 783 | **−84%** |
-| Tool selection accuracy S1 | 33.3% | 50.0% | **+16.7pp** |
-| Tool selection accuracy S2 | 27.3% | 45.5% | **+18.2pp** |
-| Tool selection accuracy S3 | — (baseline tidak dijalankan) | 61.1% | — |
+| Token S1 (30 tools) | 2.426 | 893 | **−63%** |
+| Token S2 (100 tools) | 7.985 | 1.241 | **−84%** |
+| Token S3 (300 tools) | 23.893 | 1.239 | **−95%** |
+| Tool selection accuracy S1 | 68.8% | 75.0% | **+6.3pp** |
+| Tool selection accuracy S2 | 71.4% | 71.4% | 0pp |
+| Tool selection accuracy S3 | 71.4% | 77.6% | **+6.3pp** |
 | Jumlah tool yang dilihat AI | O(N) — ikut bertambah | O(1) — selalu ≤15 | **Sub-linear** |
+| Uji statistik token reduction | — | Wilcoxon p<0.0001, Cohen's d≥11 | **Signifikan** |
 
 > **Interpretasi**: Saat katalog tool berkembang dari 30 → 100 → 300,
-> baseline makin berat dan makin tidak akurat. Registry tetap stabil
-> karena selalu hanya menampilkan 15 tool terbaik.
+> token baseline melonjak linier (2K→8K→24K). Registry tetap stabil
+> di ~1.240 token karena selalu hanya menampilkan 15 tool terbaik.
+> Penghematan token tervalidasi secara statistik (p<0.0001) di semua skenario.
 
 ### Apa yang Ingin Dibuktikan
 
@@ -183,8 +186,8 @@ flowchart LR
     end
 
     subgraph Validasi["Status Validasi"]
-        V1["✅ Tervalidasi empiris\nS1: −62%, S2: −84%"]
-        V2["✅ Tervalidasi empiris\nS1: +16.7pp, S2: +18.2pp"]
+        V1["✅ Tervalidasi empiris\nS1: −63%, S2: −84%, S3: −95%\nWilcoxon p<0.0001"]
+        V2["✅ Tervalidasi empiris\nS1: +6.3pp, S3: +6.3pp\nS3 baseline kini tersedia"]
         V3["✅ Properti arsitektur\nVisible tools selalu cap di 15"]
         V4["✅ Diukur langsung\nS1=22KB, S2=72KB, S3=205KB"]
     end
@@ -282,25 +285,28 @@ Sumber: `outputs/summary.csv` · Laporan: `reports/tool-registry-eval/report.md`
 | Accuracy improvement | ⚠️ Simulasi dengan koefisien asumsi |
 | Memory footprint | ✅ Real Python measurement |
 
-### Eksperimen Gemini Native Function Calling (S1–S3, 3 repeats, n=156) ← HASIL RESMI
+### Eksperimen Gemini Native Function Calling v2 (S1–S3, 3 repeats, n=558) ← HASIL RESMI
 
-Sumber: `outputs/gemini-native/summary.csv` · Laporan: `reports/tool-registry-eval-gemini-native/report.md`
+Sumber: `outputs/gemini-native-v2/summary.csv` · Laporan: `reports/tool-registry-eval-gemini-native-v2/report.md`
+
+Dataset: **100 query** (50 single-domain, 30 cross-domain, 20 adversarial). S3 baseline kini tersedia.
 
 | Klaim | Status | Bukti Empiris |
 |-------|--------|---------------|
-| Token reduction | ✅ Tervalidasi | S1: 61.8%, S2: 84.3% |
-| Accuracy: registry > baseline | ✅ Tervalidasi | S1: +16.7pp, S2: +18.2pp |
-| Sub-linear scalability | ✅ Tervalidasi | Visible tools S1=10.8, S2/S3=15 vs O(N) baseline |
-| Memory footprint | ✅ Tervalidasi | Real Python measurement |
-| Latency improvement | ⚠️ Modest/noisy | p50 S2: −20%; S3 registry ~914ms |
+| Token reduction | ✅ Tervalidasi + statistik | S1: −63%, S2: −84%, S3: −95%; Wilcoxon p<0.0001, Cohen's d≥11 |
+| Accuracy: registry ≥ baseline | ✅ Tervalidasi | S1: +6.3pp, S3: +6.3pp; S2 sama (71.4%) |
+| Sub-linear scalability | ✅ Architectural property | Visible tools S1=10.6, S2/S3=15 vs baseline O(N) |
+| Memory footprint | ✅ Real Python measurement | S1=22KB, S2=72KB, S3=205KB |
+| Latency improvement | ⚠️ Modest/noisy | S3 registry 851ms vs S3 baseline 992ms (−14%) |
 
 | Skenario | Mode | Avg Tokens | Accuracy | Latency p50 (ms) |
 |----------|------|------------|----------|------------------|
-| S1 | baseline | 1.520 | 0.333 | 1.155 |
-| S1 | registry | 581 | **0.500** | 1.123 |
-| S2 | baseline | 5.002 | 0.273 | 1.137 |
-| S2 | registry | 783 | **0.455** | 908 |
-| S3 | registry | 790 | **0.611** | 914 |
+| S1 | baseline | 2.426 | 68.8% | 833 |
+| S1 | registry | 893 | **75.0%** | 905 |
+| S2 | baseline | 7.985 | 71.4% | 1.014 |
+| S2 | registry | 1.241 | **71.4%** | 910 |
+| S3 | baseline | 23.893 | 71.4% | 992 |
+| S3 | registry | 1.239 | **77.6%** | 851 |
 
 ### Eksperimen Deskripsi Kaya / Docstring-Style (S1–S3, 3 repeats, n=156)
 
@@ -334,12 +340,12 @@ Modul (`src/tool_registry_eval/`): `catalog.py`, `charts.py`, `config.py`,
 Env vars utama: `EVAL_BACKEND`, `EVAL_MAX_SCENARIO`, `EVAL_BASELINE_MAX_SCENARIO`,
 `EVAL_REPEAT_RUNS`, `EVAL_OUTPUT_SUBDIR`, `EVAL_TOOL_BUDGET`, `EVAL_LIVE_BASELINE`.
 
-### Yang Masih Perlu Dilakukan
+### Status Kelengkapan Eksperimen
 
-1. Perluas eval dataset ke 100 query (50 single-domain, 30 cross-domain, 20 adversarial) — saat ini 18 unique queries.
-2. Tambahkan uji statistik: paired Wilcoxon, Cohen's d, 95% CI di `src/tool_registry_eval/measure.py`.
-3. Jalankan S3 baseline (300 tools, semua visible) — saat ini hanya S3 registry yang ada; tanpa S3 baseline, perbandingan langsung baseline vs registry di skenario terbesar belum bisa dilakukan.
-4. Dokumentasikan threats to validity di Bab 5 (failure pattern + description quality confound).
+✅ Dataset 100 query (50/30/20) — selesai, dikodekan di `catalog.py`  
+✅ Uji statistik Wilcoxon + Cohen's d + 95% CI — selesai, di `measure.py`; output: `statistical_tests.csv`  
+✅ S3 baseline — selesai, tersedia di `outputs/gemini-native-v2/`  
+✅ Draft Bab 5 threats to validity — selesai, di `plan/02-bab5-threats-to-validity.md`
 
 ---
 

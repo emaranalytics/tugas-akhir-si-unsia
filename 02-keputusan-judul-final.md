@@ -102,10 +102,11 @@ Metrik utama yang akan digunakan:
 
 ## 6b. Temuan Evaluasi (per 5 Mei 2026)
 
-Tiga set eksperimen telah dijalankan:
+Empat set eksperimen telah dijalankan:
 (1) benchmark synthetic deterministik S1–S4,
 (2) eksperimen Gemini compact text router S1–S3 (3 repeats, n=210) — **sudah digantikan**,
-(3) eksperimen Gemini native function_declarations S1–S3 (3 repeats, n=156) — **hasil resmi**.
+(3) eksperimen Gemini native function_declarations S1–S3 (3 repeats, n=156) — **digantikan v2**,
+(4) eksperimen Gemini native v2 — 100 query, S1–S3 full baseline+registry (3 repeats, n=558) — **hasil resmi**.
 
 ### Hasil Benchmark Synthetic (S1–S4, deterministik)
 
@@ -125,32 +126,33 @@ Sumber: `outputs/summary.csv` · Laporan: `reports/tool-registry-eval/report.md`
 Catatan: accuracy dan latency di synthetic adalah model simulasi dengan koefisien
 asumsi — bukan pengukuran LLM nyata. Token reduction adalah aritmatika yang valid.
 
-### Hasil Eksperimen Gemini Native Function Calling (S1–S3, 3 repeats, n=156) ← HASIL RESMI
+### Hasil Eksperimen Gemini Native v2 (S1–S3, 3 repeats, n=558) ← HASIL RESMI
 
-Sumber: `outputs/gemini-native/summary.csv` · Laporan: `reports/tool-registry-eval-gemini-native/report.md`
+Sumber: `outputs/gemini-native-v2/summary.csv` · Laporan: `reports/tool-registry-eval-gemini-native-v2/report.md`
 
-> Catatan: ada juga eksperimen keempat (gemini-rich) di bawah sebagai validasi future-work.
+> Catatan: ada juga eksperimen gemini-rich di bawah sebagai validasi future-work.
 
-Backend: **Google Gen AI SDK** dengan `FunctionDeclaration` + `ToolConfig(mode=ANY)` —
-metodologi yang benar karena zerlo.id menggunakan native function calling di produksi.
+Backend: **Google Gen AI SDK** dengan `FunctionDeclaration` + `ToolConfig(mode=ANY)`.
+Dataset: **100 query** (50 single-domain, 30 cross-domain, 20 adversarial). S3 baseline tersedia penuh.
 
 | Skenario | Mode | Total Tools | Avg Visible | Avg Tokens | Accuracy | Latency p50 (ms) |
 |----------|------|-------------|-------------|------------|----------|------------------|
-| S1 (30 tools) | baseline | 30 | 30 | 1.520 | 0.333 | 1.155 |
-| S1 (30 tools) | registry | 30 | 10.8 | 581 | 0.500 | 1.123 |
-| S2 (100 tools) | baseline | 100 | 100 | 5.002 | 0.273 | 1.137 |
-| S2 (100 tools) | registry | 100 | 15 | 783 | 0.455 | 908 |
-| S3 (300 tools) | registry | 300 | 15 | 790 | 0.611 | 914 |
+| S1 (30 tools) | baseline | 30 | 30 | 2.426 | 68.8% | 833 |
+| S1 (30 tools) | registry | 30 | 10.6 | 893 | **75.0%** | 905 |
+| S2 (100 tools) | baseline | 100 | 100 | 7.985 | 71.4% | 1.014 |
+| S2 (100 tools) | registry | 100 | 15 | 1.241 | **71.4%** | 910 |
+| S3 (300 tools) | baseline | 300 | 300 | 23.893 | 71.4% | 992 |
+| S3 (300 tools) | registry | 300 | 15 | 1.239 | **77.6%** | 851 |
 
-**Temuan utama dari Gemini native function calling:**
+**Temuan utama:**
 
 | Klaim | Status | Detail |
 |-------|--------|--------|
-| Token reduction | ✅ Tervalidasi empiris | 61.8% (S1), 84.3% (S2), ~97% S3 registry vs baseline estimasi |
-| Accuracy: registry > baseline | ✅ Tervalidasi | +16.7pp (S1), +18.2pp (S2); S3 registry 61% vs S2 baseline 27% |
-| Sub-linear scalability | ✅ Architectural property | Visible tools S1=10.8, S2=15, S3=15 (cap budget) vs baseline O(N) |
+| Token reduction | ✅ Tervalidasi empiris + statistik | −63% (S1), −84% (S2), −95% (S3); Wilcoxon p<0.0001, Cohen's d≥11 |
+| Accuracy: registry ≥ baseline | ✅ Tervalidasi | +6.3pp (S1), 0pp (S2), +6.3pp (S3) |
+| Sub-linear scalability | ✅ Architectural property | Visible tools S1=10.6, S2/S3=15 vs baseline O(N) |
 | Memory footprint | ✅ Real Python measurement | S1=22KB, S2=72KB, S3=205KB — linear dengan katalog |
-| Latency improvement | ⚠️ Modest / noisy | p50 S2: 1137→908ms (−20%); S3 registry 914ms vs S2 baseline 1137ms |
+| Latency improvement | ⚠️ Modest / noisy | S3: 992ms→851ms (−14%); S2: 1014ms→910ms (−10%) |
 
 **Perbandingan compact text router vs native function calling:**
 

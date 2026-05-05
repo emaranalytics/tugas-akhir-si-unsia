@@ -1,8 +1,8 @@
 # Dev Plan — Evaluasi Tool Registry
 
-**Versi Dokumen**: 1.4
+**Versi Dokumen**: 1.5
 **Tanggal Update**: 5 Mei 2026
-**Status**: Empat eksperimen selesai — synthetic S1–S4, Gemini native FC S1–S3 (hasil resmi), Gemini rich-description S1–S3 (future-work validation)
+**Status**: Lima eksperimen selesai — synthetic S1–S4, Gemini native FC v1 S1–S3, Gemini rich-description S1–S3 (future-work), Gemini native v2 S1–S3 full baseline+registry 100 query (hasil resmi)
 
 Judul aktif:
 
@@ -88,8 +88,10 @@ src/
 
 outputs/
   baseline.jsonl / registry.jsonl / summary.csv   ← synthetic S1–S4
-  gemini-native/                                   ← HASIL RESMI (native FC, short descriptions)
+  gemini-native/                                   ← v1 (18 query, S1–S3, S3 baseline missing)
     baseline.jsonl / registry.jsonl / summary.csv
+  gemini-native-v2/                                ← HASIL RESMI (100 query, S1–S3 full)
+    baseline.jsonl / registry.jsonl / summary.csv / statistical_tests.csv
   gemini-rich/                                     ← future-work validation (docstring-style)
     baseline.jsonl / registry.jsonl / summary.csv
 
@@ -319,22 +321,25 @@ Sumber: `outputs/summary.csv` · Laporan: `reports/tool-registry-eval/report.md`
 Token reduction dan sub-linear scalability valid (aritmatika). Accuracy/latency adalah
 simulasi dengan koefisien asumsi — bukan LLM nyata. Oracle trick sudah dihapus.
 
-### 9.2 Gemini Native Function Calling — HASIL RESMI (S1–S3, 3 repeats, n=156)
+### 9.2 Gemini Native Function Calling v2 — HASIL RESMI (S1–S3, 3 repeats, n=558)
 
-Sumber: `outputs/gemini-native/summary.csv` · Laporan: `reports/tool-registry-eval-gemini-native/report.md`
+Sumber: `outputs/gemini-native-v2/summary.csv` · Laporan: `reports/tool-registry-eval-gemini-native-v2/report.md`
 
 Backend: Google Gen AI SDK, `FunctionDeclaration` + `mode:ANY`, short descriptions.
+Dataset: 100 query (50/30/20). S3 baseline tersedia penuh. Uji statistik tersedia di `statistical_tests.csv`.
 
 | Skenario | Mode | Avg Tokens | Accuracy | Token Reduction |
 |----------|------|------------|----------|-----------------|
-| S1 | baseline | 1.520 | 33.3% | — |
-| S1 | registry | 581 | **50.0%** | −61.8% |
-| S2 | baseline | 5.002 | 27.3% | — |
-| S2 | registry | 783 | **45.5%** | −84.3% |
-| S3 | registry | 790 | **61.1%** | ~−97% vs S3 est. |
+| S1 | baseline | 2.426 | 68.8% | — |
+| S1 | registry | 893 | **75.0%** | −63.2% |
+| S2 | baseline | 7.985 | 71.4% | — |
+| S2 | registry | 1.241 | **71.4%** | −84.5% |
+| S3 | baseline | 23.893 | 71.4% | — |
+| S3 | registry | 1.239 | **77.6%** | −94.8% |
 
-Registry konsisten unggul atas baseline. Systematic failures pada 5–7 query terjadi
-di baseline DAN registry — ini adalah confound deskripsi, bukan kegagalan registry.
+Uji statistik paired Wilcoxon: p<0.0001 untuk token reduction di semua skenario.
+Cohen's d: S1=11.7, S2=290.9, S3=782.0 — effect size sangat besar (expected, token reduction adalah properti arsitektur).
+Registry konsisten unggul atau setara baseline dalam accuracy, dengan token jauh lebih rendah.
 
 ### 9.3 Gemini Rich Description — Future-Work Validation (S1–S3, 3 repeats, n=156)
 
@@ -363,28 +368,14 @@ Std dev tersedia di summary.csv untuk semua metrik.
 
 ### 10.2 Perluasan Eval Dataset
 
-Dataset saat ini: 34 query.
-Target untuk Bab 4 final:
-
-| Kategori | Jumlah Target |
-|----------|--------------|
-| Single-domain | 50 |
-| Cross-domain | 30 |
-| Adversarial | 20 |
-| **Total** | **100** |
-
-Tambahkan query di `src/evals/queries.jsonl` dengan field
-`query_type` yang sesuai.
+✅ **SELESAI** — 100 query (50 single-domain, 30 cross-domain, 20 adversarial) dikodekan
+di `catalog.py` `make_queries()`. Selalu diregenerasi secara deterministik saat run.
 
 ### 10.3 Uji Statistik
 
-Tambahkan ke `src/tool_registry_eval/measure.py`:
-
-- Paired t-test atau Wilcoxon signed-rank (token baseline vs registry).
-- Effect size Cohen's d.
-- 95% confidence interval pada accuracy dan token reduction.
-
-Referensi: `scipy.stats.wilcoxon`, `scipy.stats.ttest_rel`.
+✅ **SELESAI** — `paired_statistical_tests()` dan `all_statistical_tests()` ditambahkan ke
+`src/tool_registry_eval/measure.py`. Output: `statistical_tests.csv` per run.
+Tersedia: Wilcoxon signed-rank, Cohen's d, 95% CI (token reduction dan accuracy).
 
 ### 10.4 Pemisahan Laporan Synthetic vs Gemini Nyata
 
@@ -397,13 +388,6 @@ Ini adalah pembingkaian yang defensible secara akademik.
 
 ### 10.5 Dokumentasi Threats to Validity
 
-Untuk Bab 5 skripsi, dokumentasikan:
-
-- Synthetic tool catalog tidak merepresentasikan tool produksi sempurna.
-- Perilaku model Gemini dapat berubah antar versi.
-- Latency API bergantung pada kondisi jaringan.
-- Dataset eval kecil (34 unique queries) dapat membiaskan akurasi — target 100 query.
-- **[BARU]** Kualitas deskripsi tool adalah confounding variable — dikontrol di gemini-native
-  (deskripsi seragam pendek), divalidasi di gemini-rich (template generik memperburuk akurasi).
-- **[BARU]** Empty parameter schemas (`properties: {}`) menghilangkan diferensiasi struktural
-  antar tool dalam modul yang sama.
+✅ **SELESAI** — Draft lengkap tersedia di `plan/02-bab5-threats-to-validity.md`.
+Mencakup 7 ancaman validitas (internal/eksternal/konstruk) dengan tabel mitigasi.
+Siap dipaste ke Bab 5 skripsi.
