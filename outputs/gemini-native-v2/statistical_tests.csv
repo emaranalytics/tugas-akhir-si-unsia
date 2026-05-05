@@ -1,0 +1,4 @@
+scenario,n_pairs,token_reduction_mean,token_reduction_ci95_lower,token_reduction_ci95_upper,wilcoxon_token_stat,wilcoxon_token_p,cohens_d_tokens,accuracy_improvement_mean,accuracy_improvement_std,wilcoxon_accuracy_p
+S1,16,1533.75,1463.93,1603.57,136.0,0.000204,11.7052,0.0625,0.4285,0.281851
+S2,28,6744.0,6735.01,6752.99,406.0,2e-06,290.909,0.0,0.2673,0.5
+S3,49,22653.61,22645.29,22661.93,1225.0,0.0,782.0074,0.0612,0.3135,0.089856

@@ -7,6 +7,12 @@ from typing import Any
 from .domain import QueryDef, ToolDef
 from .registry import stable_unit
 
+try:
+    from scipy import stats as _scipy_stats
+    _SCIPY_AVAILABLE = True
+except ImportError:
+    _SCIPY_AVAILABLE = False
+
 
 def token_count(query: QueryDef, visible_tools: list[ToolDef]) -> tuple[int, int, int]:
     prompt_tokens = 420
@@ -63,6 +69,92 @@ def percentile(values: list[float], pct: float) -> float:
         return sorted_values[int(index)]
     weight = index - lower
     return sorted_values[lower] * (1 - weight) + sorted_values[upper] * weight
+
+
+def paired_statistical_tests(rows: list[dict[str, Any]], scenario: str) -> dict[str, Any]:
+    """Paired Wilcoxon signed-rank, Cohen's d, and 95% CI for token reduction in one scenario.
+
+    Matches baseline and registry by query_id, averages over repeats, then runs
+    paired tests on total_tokens. Returns empty dict if scipy is unavailable or
+    data is insufficient.
+    """
+    if not _SCIPY_AVAILABLE:
+        return {"error": "scipy not installed"}
+
+    baseline_by_q: dict[str, list[tuple[float, float]]] = {}
+    registry_by_q: dict[str, list[tuple[float, float]]] = {}
+    for row in rows:
+        if row["scenario"] != scenario:
+            continue
+        qid = row["query_id"]
+        tokens = float(row["total_tokens"])
+        correct = 1.0 if row["is_correct"] else 0.0
+        if row["mode"] == "baseline":
+            baseline_by_q.setdefault(qid, []).append((tokens, correct))
+        elif row["mode"] == "registry":
+            registry_by_q.setdefault(qid, []).append((tokens, correct))
+
+    common = sorted(set(baseline_by_q) & set(registry_by_q))
+    n = len(common)
+    if n < 3:
+        return {"scenario": scenario, "n_pairs": n, "error": "insufficient paired data (need ≥3)"}
+
+    b_tokens = [statistics.mean(t for t, _ in baseline_by_q[q]) for q in common]
+    r_tokens = [statistics.mean(t for t, _ in registry_by_q[q]) for q in common]
+    b_acc = [statistics.mean(c for _, c in baseline_by_q[q]) for q in common]
+    r_acc = [statistics.mean(c for _, c in registry_by_q[q]) for q in common]
+
+    token_diffs = [b - r for b, r in zip(b_tokens, r_tokens)]  # positive = registry saves tokens
+    acc_diffs = [r - b for b, r in zip(b_acc, r_acc)]  # positive = registry more accurate
+
+    mean_diff = statistics.mean(token_diffs)
+    std_diff = statistics.pstdev(token_diffs) if n > 1 else 0.0
+    cohens_d = mean_diff / std_diff if std_diff > 0 else None
+
+    try:
+        w_stat, w_p = _scipy_stats.wilcoxon(token_diffs, alternative="greater")
+    except Exception:
+        w_stat, w_p = None, None
+
+    se = std_diff / math.sqrt(n) if n > 0 else 0.0
+    t_crit = _scipy_stats.t.ppf(0.975, df=n - 1) if n > 1 else 1.96
+    ci_lower = mean_diff - t_crit * se
+    ci_upper = mean_diff + t_crit * se
+
+    mean_acc_diff = statistics.mean(acc_diffs)
+    std_acc_diff = statistics.pstdev(acc_diffs) if n > 1 else 0.0
+    try:
+        _, acc_p = _scipy_stats.wilcoxon(acc_diffs, alternative="greater")
+    except Exception:
+        acc_p = None
+
+    return {
+        "scenario": scenario,
+        "n_pairs": n,
+        "token_reduction_mean": round(mean_diff, 2),
+        "token_reduction_ci95_lower": round(ci_lower, 2),
+        "token_reduction_ci95_upper": round(ci_upper, 2),
+        "wilcoxon_token_stat": round(w_stat, 4) if w_stat is not None else None,
+        "wilcoxon_token_p": round(w_p, 6) if w_p is not None else None,
+        "cohens_d_tokens": round(cohens_d, 4) if cohens_d is not None else None,
+        "accuracy_improvement_mean": round(mean_acc_diff, 4),
+        "accuracy_improvement_std": round(std_acc_diff, 4),
+        "wilcoxon_accuracy_p": round(acc_p, 6) if acc_p is not None else None,
+    }
+
+
+def all_statistical_tests(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Run paired_statistical_tests for every scenario that has both baseline and registry data."""
+    scenarios_with_both: set[str] = set()
+    scenarios_baseline: set[str] = set()
+    scenarios_registry: set[str] = set()
+    for row in rows:
+        if row["mode"] == "baseline":
+            scenarios_baseline.add(row["scenario"])
+        elif row["mode"] == "registry":
+            scenarios_registry.add(row["scenario"])
+    scenarios_with_both = scenarios_baseline & scenarios_registry
+    return [paired_statistical_tests(rows, s) for s in sorted(scenarios_with_both)]
 
 
 def summarize(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:

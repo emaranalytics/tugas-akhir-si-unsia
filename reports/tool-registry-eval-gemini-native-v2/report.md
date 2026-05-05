@@ -1,104 +1,4 @@
-from __future__ import annotations
-
-from pathlib import Path
-
-from .config import EvalConfig
-from .paths import REPORT_DIR
-
-try:
-    from google import genai  # noqa: F401
-except Exception:
-    genai = None
-
-
-def markdown_table(rows: list[dict], headers: list[str] | None = None) -> str:
-    if not rows:
-        return "_no data_"
-    if headers is None:
-        headers = list(rows[0].keys())
-    lines = [
-        "| " + " | ".join(headers) + " |",
-        "| " + " | ".join(["---"] * len(headers)) + " |",
-    ]
-    for row in rows:
-        lines.append("| " + " | ".join(str(row.get(h, "")) for h in headers) + " |")
-    return "\n".join(lines)
-
-
-def _summary_headers_synthetic() -> list[str]:
-    return [
-        "scenario", "mode", "total_tools", "avg_visible_tools",
-        "avg_total_tokens", "accuracy", "latency_p50_ms", "latency_p95_ms",
-        "registry_memory_bytes", "runs",
-    ]
-
-
-def _summary_headers_gemini() -> list[str]:
-    return [
-        "scenario", "mode", "total_tools", "avg_visible_tools",
-        "avg_total_tokens", "std_total_tokens",
-        "accuracy", "std_accuracy",
-        "latency_p50_ms", "latency_p95_ms", "latency_mean_ms", "std_latency_ms",
-        "registry_memory_bytes", "runs",
-    ]
-
-
-def _methodology_note(config: EvalConfig) -> str:
-    if config.backend == "synthetic":
-        return """\
-## Methodology Note (Synthetic Backend)
-
-This report was produced by a **deterministic simulation model**, not by real LLM calls.
-Token counts are computed as `420 (prompt) + query_tokens + Σ schema_tokens(visible tools) + 72 (output)`.
-Accuracy and latency are derived from parameterised penalty formulas:
-
-- **Accuracy** — baseline probability degrades as `0.95 − min(0.56, log₁₀(N) × 0.19) − type_penalty`;
-  registry probability degrades as `0.96 − min(0.08, log₁₀(K) × 0.035) − type_penalty`
-  where N = total tools and K = visible tools after filtering.
-- **Latency** — `185 + visible_tools × (7.4 | baseline, 3.1 | registry) + tokens × 0.042 + jitter`.
-
-These coefficients are modelling assumptions calibrated to plausible LLM behaviour, **not measured from
-real Gemini runs**. Token reduction and sub-linear scalability claims are arithmetic properties of the
-formula and are valid. Accuracy and latency improvement claims must be confirmed with real LLM runs.
-"""
-    else:
-        return f"""\
-## Methodology Note (Gemini Native Backend)
-
-This report was produced by **real Gemini API calls using native function calling** via Google Gen AI SDK.
-
-- Model: `{config.model}`
-- Each query was run `{config.repeat_runs}` time(s) to account for stochasticity.
-- Tools are passed as native `FunctionDeclaration` objects via `google.genai.types`. Each tool
-  gets a `name`, `description`, and empty `parameters` schema — the same declaration format
-  used in the zerlo.id production system.
-- Tool description format: `[op_type] Modul <module>. Kata kunci: kw1, kw2, kw3.`
-- `tool_config` is set to `mode: ANY` with `allowed_function_names` — Gemini is forced to call
-  exactly one function from the visible set.
-- Token counts are the actual `usage_metadata` returned by the Gemini API (includes function declaration tokens).
-- Baseline mode sends all scenario tools as function declarations; registry mode sends only the
-  top-k filtered tools, capped at `EVAL_TOOL_BUDGET={config.tool_budget}`.
-- Accuracy = fraction of runs where the called function name matches `expected_tool`.
-- Tool call is read from `response.candidates[0].content.parts[*].function_call.name`.
-- Latency = wall-clock time measured with `time.perf_counter()` around `generate_content()`.
-- Baseline capped at `EVAL_BASELINE_MAX_SCENARIO={config.baseline_max_scenario}` to stay within
-  token budget (S3 baseline ≈ 300 tools × 120 tokens × 18 queries × 3 repeats ≈ 1.9M tokens).
-"""
-
-
-def write_report(
-    summary: list[dict],
-    rows: list[dict],
-    config: EvalConfig,
-    report_dir: Path = REPORT_DIR,
-    stat_tests: list[dict] | None = None,
-) -> None:
-    stat_tests = stat_tests or []
-    backend_label = "synthetic deterministic benchmark" if config.backend == "synthetic" else "live Gemini native function calling (Google Gen AI SDK)"
-    headers = _summary_headers_gemini() if config.backend == "gemini" else _summary_headers_synthetic()
-    method_note = _methodology_note(config)
-
-    report = f"""# Tool Registry Evaluation Report
+# Tool Registry Evaluation Report
 
 Judul:
 
@@ -109,17 +9,37 @@ Judul:
 | Item | Value |
 |------|-------|
 | Runner | `src/experiments/run_eval.py` |
-| Backend | `{config.backend}` |
-| Model | `{config.model}` |
-| Google Gen AI SDK | `{"available" if genai is not None else "not available"}` |
-| API key present | `{config.api_key_present}` |
-| Tool budget | `{config.tool_budget}` |
-| Live baseline enabled | `{config.live_baseline}` |
-| Repeat runs | `{config.repeat_runs}` |
-| Run mode | {backend_label} |
-| Total records | {len(rows)} |
+| Backend | `gemini` |
+| Model | `gemini-2.5-flash-lite` |
+| Google Gen AI SDK | `available` |
+| API key present | `True` |
+| Tool budget | `15` |
+| Live baseline enabled | `True` |
+| Repeat runs | `3` |
+| Run mode | live Gemini native function calling (Google Gen AI SDK) |
+| Total records | 558 |
 
-{method_note}
+## Methodology Note (Gemini Native Backend)
+
+This report was produced by **real Gemini API calls using native function calling** via Google Gen AI SDK.
+
+- Model: `gemini-2.5-flash-lite`
+- Each query was run `3` time(s) to account for stochasticity.
+- Tools are passed as native `FunctionDeclaration` objects via `google.genai.types`. Each tool
+  gets a `name`, `description`, and empty `parameters` schema — the same declaration format
+  used in the zerlo.id production system.
+- Tool description format: `[op_type] Modul <module>. Kata kunci: kw1, kw2, kw3.`
+- `tool_config` is set to `mode: ANY` with `allowed_function_names` — Gemini is forced to call
+  exactly one function from the visible set.
+- Token counts are the actual `usage_metadata` returned by the Gemini API (includes function declaration tokens).
+- Baseline mode sends all scenario tools as function declarations; registry mode sends only the
+  top-k filtered tools, capped at `EVAL_TOOL_BUDGET=15`.
+- Accuracy = fraction of runs where the called function name matches `expected_tool`.
+- Tool call is read from `response.candidates[0].content.parts[*].function_call.name`.
+- Latency = wall-clock time measured with `time.perf_counter()` around `generate_content()`.
+- Baseline capped at `EVAL_BASELINE_MAX_SCENARIO=S3` to stay within
+  token budget (S3 baseline ≈ 300 tools × 120 tokens × 18 queries × 3 repeats ≈ 1.9M tokens).
+
 ## Experiment Flow
 
 ```mermaid
@@ -137,7 +57,14 @@ flowchart LR
 
 ## Summary Metrics
 
-{markdown_table(summary, headers)}
+| scenario | mode | total_tools | avg_visible_tools | avg_total_tokens | std_total_tokens | accuracy | std_accuracy | latency_p50_ms | latency_p95_ms | latency_mean_ms | std_latency_ms | registry_memory_bytes | runs |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| S1 | baseline | 30 | 30 | 2426.312 | 5.394 | 0.6875 | 0.4635 | 832.51 | 1310.713 | 911.099 | 198.256 | 0 | 48 |
+| S1 | registry | 30 | 10.625 | 892.562 | 133.375 | 0.75 | 0.433 | 904.571 | 2566.992 | 1210.228 | 719.336 | 22662 | 48 |
+| S2 | baseline | 100 | 100 | 7984.5 | 6.086 | 0.7143 | 0.4518 | 1013.772 | 2625.074 | 1329.242 | 1030.092 | 0 | 84 |
+| S2 | registry | 100 | 15 | 1240.5 | 22.666 | 0.7143 | 0.4518 | 910.012 | 1369.281 | 953.972 | 225.82 | 71971 | 84 |
+| S3 | baseline | 300 | 300 | 23892.857 | 5.7 | 0.7143 | 0.4518 | 991.514 | 1547.357 | 1071.295 | 233.63 | 0 | 147 |
+| S3 | registry | 300 | 15 | 1239.245 | 29.826 | 0.7755 | 0.4172 | 850.779 | 1112.572 | 942.054 | 730.414 | 205354 | 147 |
 
 ## Visualizations
 
@@ -163,7 +90,11 @@ flowchart LR
 
 ## Statistical Tests (Paired Wilcoxon + Cohen's d + 95% CI)
 
-{markdown_table(stat_tests, ["scenario","n_pairs","token_reduction_mean","token_reduction_ci95_lower","token_reduction_ci95_upper","wilcoxon_token_p","cohens_d_tokens","accuracy_improvement_mean","wilcoxon_accuracy_p"]) if stat_tests else "_Statistical tests require both baseline and registry data for the same scenario. Run with `EVAL_LIVE_BASELINE=true` to enable._"}
+| scenario | n_pairs | token_reduction_mean | token_reduction_ci95_lower | token_reduction_ci95_upper | wilcoxon_token_p | cohens_d_tokens | accuracy_improvement_mean | wilcoxon_accuracy_p |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| S1 | 16 | 1533.75 | 1463.93 | 1603.57 | 0.000204 | 11.7052 | 0.0625 | 0.281851 |
+| S2 | 28 | 6744.0 | 6735.01 | 6752.99 | 2e-06 | 290.909 | 0.0 | 0.5 |
+| S3 | 49 | 22653.61 | 22645.29 | 22661.93 | 0.0 | 782.0074 | 0.0612 | 0.089856 |
 
 Interpretasi:
 - **token_reduction_mean**: rata-rata token yang dihemat registry vs baseline per query (token absolut).
@@ -256,7 +187,7 @@ The following query/mode pairs fail deterministically on all 3 repeats (across n
 | `sales_daily_revenue` | `sales_analytical_*` | cross_domain | S2–S3 (q022) |
 | `compliance_check_halal_certificate` | `compliance_admin_tool_01` | single | S3 (q033) |
 
-**Root cause**: Empty parameter schemas (`properties: {{}}`) remove structural differentiation.
+**Root cause**: Empty parameter schemas (`properties: {}`) remove structural differentiation.
 All tools within the same module share the same schema — Gemini falls back to description
 string similarity, where `[Buat/ubah/hapus data]` (write) vs `[Baca/lihat data]` (read) vs
 `[Analisis dan laporan]` (analytical) are too short to reliably distinguish action intent.
@@ -272,5 +203,3 @@ this thesis but documented as future work: add one-line intent snippets to descr
 - Re-run synthetic: `python3 src/experiments/run_eval.py`
 - Re-run Gemini native S1–S3 (3 repeats): `EVAL_BACKEND=gemini EVAL_MAX_SCENARIO=S3 EVAL_BASELINE_MAX_SCENARIO=S2 EVAL_REPEAT_RUNS=3 EVAL_LIVE_BASELINE=true EVAL_OUTPUT_SUBDIR=gemini-native python3 src/experiments/run_eval.py`
 - Compact text router results (for comparison): `outputs/gemini-eval/summary.csv`
-"""
-    (report_dir / "report.md").write_text(report, encoding="utf-8")

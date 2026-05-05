@@ -9,7 +9,7 @@ from .charts import make_charts
 from .config import EvalConfig, load_config
 from .gemini_backend import run_gemini_row
 from .io import write_csv
-from .measure import summarize
+from .measure import all_statistical_tests, summarize
 from .paths import ensure_dirs, resolve_output_dir, resolve_report_dir
 from .registry import registry_memory
 from .scenarios import SCENARIOS
@@ -103,10 +103,17 @@ def main() -> None:
 
     summary = summarize(rows)
     write_csv(output_dir / "summary.csv", summary)
+
+    stat_tests = all_statistical_tests(rows)
+    if stat_tests:
+        write_csv(output_dir / "statistical_tests.csv", stat_tests)
+
     make_charts(summary, report_dir / "charts")
     from .report import write_report
-    write_report(summary, rows, config, report_dir)
+    write_report(summary, rows, config, report_dir, stat_tests=stat_tests)
 
     print(f"Wrote {len(rows)} records")
     print(f"Summary: {output_dir / 'summary.csv'}")
+    if stat_tests:
+        print(f"Stats:   {output_dir / 'statistical_tests.csv'}")
     print(f"Report:  {report_dir / 'report.md'}")

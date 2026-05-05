@@ -93,10 +93,15 @@ def run_gemini_row(
         max_output_tokens=32,
     )
 
+    # Small throttle to avoid sustained-load 503s from Gemini free tier.
+    time.sleep(0.5)
+
     # Retry on transient 503/429 with exponential backoff.
+    # Note: the SDK uses tenacity internally; we wrap it again so the outer
+    # loop can survive bursts that exhaust the SDK-level retries.
     started = time.perf_counter()
     resp = None
-    for attempt in range(5):
+    for attempt in range(6):
         try:
             resp = client.models.generate_content(
                 model=config.model,
@@ -105,10 +110,19 @@ def run_gemini_row(
             )
             break
         except (genai_errors.ServerError, genai_errors.ClientError) as exc:
-            status = getattr(exc, "status_code", 0) or 0
-            if status in (429, 503) and attempt < 4:
-                wait = 2 ** (attempt + 2)  # 4, 8, 16, 32 seconds
-                print(f"    [{status}] retry {attempt + 1}/4 in {wait}s ...", flush=True)
+            # status_code may live on the exception directly or in its args
+            status = getattr(exc, "status_code", None)
+            if status is None:
+                msg = str(exc)
+                if "503" in msg or "UNAVAILABLE" in msg:
+                    status = 503
+                elif "429" in msg or "RESOURCE_EXHAUSTED" in msg:
+                    status = 429
+                else:
+                    status = 0
+            if status in (429, 503) and attempt < 5:
+                wait = 2 ** (attempt + 3)  # 8, 16, 32, 64, 128 seconds
+                print(f"    [{status}] retry {attempt + 1}/5 in {wait}s ...", flush=True)
                 time.sleep(wait)
             else:
                 raise
