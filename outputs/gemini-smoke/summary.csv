@@ -1,0 +1,2 @@
+scenario,mode,total_tools,avg_visible_tools,avg_total_tokens,accuracy,latency_p50_ms,latency_p95_ms,latency_mean_ms,registry_memory_bytes,runs
+S1,registry,30,3,108,1.0,833.081,833.081,833.081,21966,1

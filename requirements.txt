@@ -1,0 +1,14 @@
+google-genai
+python-dotenv
+pydantic-ai
+pydantic
+pandas
+numpy
+scipy
+matplotlib
+tqdm
+typer
+rich
+psutil
+pytest
+ruff

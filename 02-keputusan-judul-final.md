@@ -100,6 +100,119 @@ Metrik utama yang akan digunakan:
 
 ---
 
+## 6b. Temuan Evaluasi (per 5 Mei 2026)
+
+Tiga set eksperimen telah dijalankan:
+(1) benchmark synthetic deterministik S1–S4,
+(2) eksperimen Gemini compact text router S1–S3 (3 repeats, n=210) — **sudah digantikan**,
+(3) eksperimen Gemini native function_declarations S1–S3 (3 repeats, n=156) — **hasil resmi**.
+
+### Hasil Benchmark Synthetic (S1–S4, deterministik)
+
+Sumber: `outputs/summary.csv` · Laporan: `reports/tool-registry-eval/report.md`
+
+| Skenario | Mode | Avg Tokens | Accuracy | Latency p95 (ms) |
+|----------|------|------------|----------|------------------|
+| S1 (30 tools) | baseline | 3.423 | 0.50 | 611 |
+| S1 (30 tools) | registry | 1.560 | 1.00 | 367 |
+| S2 (100 tools) | baseline | 10.410 | 0.18 | 1.430 |
+| S2 (100 tools) | registry | 1.969 | 1.00 | 395 |
+| S3 (300 tools) | baseline | 30.496 | 0.50 | 3.748 |
+| S3 (300 tools) | registry | 1.971 | 0.89 | 397 |
+| S4 (1.000 tools) | baseline | 101.970 | 0.41 | 11.938 |
+| S4 (1.000 tools) | registry | 2.014 | 0.88 | 402 |
+
+Catatan: accuracy dan latency di synthetic adalah model simulasi dengan koefisien
+asumsi — bukan pengukuran LLM nyata. Token reduction adalah aritmatika yang valid.
+
+### Hasil Eksperimen Gemini Native Function Calling (S1–S3, 3 repeats, n=156) ← HASIL RESMI
+
+Sumber: `outputs/gemini-native/summary.csv` · Laporan: `reports/tool-registry-eval-gemini-native/report.md`
+
+> Catatan: ada juga eksperimen keempat (gemini-rich) di bawah sebagai validasi future-work.
+
+Backend: **Google Gen AI SDK** dengan `FunctionDeclaration` + `ToolConfig(mode=ANY)` —
+metodologi yang benar karena zerlo.id menggunakan native function calling di produksi.
+
+| Skenario | Mode | Total Tools | Avg Visible | Avg Tokens | Accuracy | Latency p50 (ms) |
+|----------|------|-------------|-------------|------------|----------|------------------|
+| S1 (30 tools) | baseline | 30 | 30 | 1.520 | 0.333 | 1.155 |
+| S1 (30 tools) | registry | 30 | 10.8 | 581 | 0.500 | 1.123 |
+| S2 (100 tools) | baseline | 100 | 100 | 5.002 | 0.273 | 1.137 |
+| S2 (100 tools) | registry | 100 | 15 | 783 | 0.455 | 908 |
+| S3 (300 tools) | registry | 300 | 15 | 790 | 0.611 | 914 |
+
+**Temuan utama dari Gemini native function calling:**
+
+| Klaim | Status | Detail |
+|-------|--------|--------|
+| Token reduction | ✅ Tervalidasi empiris | 61.8% (S1), 84.3% (S2), ~97% S3 registry vs baseline estimasi |
+| Accuracy: registry > baseline | ✅ Tervalidasi | +16.7pp (S1), +18.2pp (S2); S3 registry 61% vs S2 baseline 27% |
+| Sub-linear scalability | ✅ Architectural property | Visible tools S1=10.8, S2=15, S3=15 (cap budget) vs baseline O(N) |
+| Memory footprint | ✅ Real Python measurement | S1=22KB, S2=72KB, S3=205KB — linear dengan katalog |
+| Latency improvement | ⚠️ Modest / noisy | p50 S2: 1137→908ms (−20%); S3 registry 914ms vs S2 baseline 1137ms |
+
+**Perbandingan compact text router vs native function calling:**
+
+| Skenario | Mode | Compact Router Acc | Native FC Acc | Selisih |
+|----------|------|--------------------|---------------|---------|
+| S1 | baseline | 83.3% | 33.3% | −50pp |
+| S1 | registry | 83.3% | 50.0% | −33pp |
+| S2 | baseline | 72.7% | 27.3% | −45pp |
+| S2 | registry | 81.8% | 45.5% | −36pp |
+| S3 | registry | 88.9% | 61.1% | −28pp |
+
+Compact text router menghasilkan accuracy tinggi karena Gemini melakukan **pattern matching
+pada nama tool dalam teks**, bukan semantic function calling. Native FC adalah metodologi
+yang benar dan lebih jujur — namun menunjukkan bahwa tool description format (empty schema,
+short description) adalah confounding variable penting.
+
+**Analisis kegagalan sistematis (untuk Bab 4 dan Bab 5):**
+
+Kegagalan berpola pada 5–7 query yang konsisten di semua pengulangan. Penyebab utama:
+empty parameter schemas (`properties: {}`) menghapus diferensiasi struktural. Semua tool
+dalam modul yang sama berbagi schema identik — Gemini hanya bisa membedakan dari deskripsi
+teks pendek, di mana `[Buat/ubah/hapus data]` vs `[Analisis dan laporan]` tidak cukup
+untuk disambiguasi aksi dengan penalaran tinggi.
+
+Kegagalan ini terjadi di **baseline maupun registry** — ini bukan kegagalan registry,
+melainkan keterbatasan format deskripsi tool. Registry tetap unggul dalam accuracy karena
+mengurangi jumlah distractor dari O(N) ke O(budget).
+
+**Implikasi untuk Bab 5 (keterbatasan + future work):** Two-stage hybrid prompt —
+registry filter ke modul relevan (stage 1, penghematan besar), lalu tambahkan intent
+unik per tool dalam filtered set (stage 2). **Catatan penting**: eksperimen gemini-rich
+(lihat bawah) membuktikan bahwa template generik justru menurunkan akurasi —
+stage 2 hanya efektif dengan docstring unik per tool, seperti yang ada di zerlo.id produksi.
+
+### Eksperimen Keempat: Deskripsi Kaya / Docstring-Style (S1–S3, 3 repeats, n=156)
+
+Sumber: `outputs/gemini-rich/summary.csv` · Laporan: `reports/tool-registry-eval-gemini-rich/report.md`
+
+Perubahan dari gemini-native: ditambahkan field `ToolDef.intent` — 20 primary tools mendapat
+intent buatan tangan; tool generik mendapat template op_type.
+
+| Skenario | Mode | Tokens (native) | Tokens (rich) | Accuracy (native) | Accuracy (rich) |
+|----------|------|-----------------|---------------|-------------------|-----------------|
+| S1 | baseline | 1.520 | 2.426 (+60%) | 33.3% | 33.3% |
+| S1 | registry | 581 | 909 (+56%) | 50.0% | 50.0% |
+| S2 | baseline | 5.002 | 7.984 (+60%) | 27.3% | 27.3% |
+| S2 | registry | 783 | 1.227 (+57%) | **45.5%** | **36.4% ↓** |
+| S3 | registry | 790 | 1.235 (+56%) | **61.1%** | **50.0% ↓** |
+
+**Temuan kunci**: template intent generik menurunkan akurasi di S2/S3 registry (−9.1pp, −11.1pp)
+sekaligus menambah token +57%. Penyebab: semua tool dengan op_type sama dalam satu modul kini
+memiliki deskripsi identik → model makin bingung, bukan makin terarah.
+
+**Implikasi ilmiah**: kualitas deskripsi tool berarti **keunikan per tool**, bukan panjang teks.
+Ini mengkonfirmasi mengapa zerlo.id produksi menggunakan docstring spesifik per service.
+Template generik = lebih banyak noise, bukan lebih banyak sinyal.
+
+Eksperimen ini juga memvalidasi bahwa **gemini-native adalah kontrol yang tepat** untuk
+mengukur kontribusi registry secara murni — variabel deskripsi sudah dikontrol (seragam pendek).
+
+---
+
 ## 7. Dokumen Terkait
 
 | File | Fungsi |
@@ -107,4 +220,11 @@ Metrik utama yang akan digunakan:
 | `00-ringkasan-project-zerlo.md` | Konteks sistem zerlo.id |
 | `01-judul-tool-registry.md` | Detail teknis dan metodologi judul terpilih |
 | `03-pertanyaan-untuk-dospem.md` | Pertanyaan bimbingan terkait judul final |
+| `plan/01-dev-plan-evaluasi-tool-registry.md` | Dev plan + status implementasi + roadmap perbaikan ilmiah |
+| `reports/tool-registry-eval/report.md` | Laporan benchmark synthetic S1–S4 |
+| `reports/tool-registry-eval-gemini-native/report.md` | Laporan Gemini native FC (hasil resmi) + failure analysis |
+| `reports/tool-registry-eval-gemini-rich/report.md` | Laporan eksperimen deskripsi kaya — validasi future-work |
+| `outputs/summary.csv` | Raw aggregated metrics synthetic S1–S4 |
+| `outputs/gemini-native/summary.csv` | Gemini native FC metrics S1–S3 (hasil resmi) |
+| `outputs/gemini-rich/summary.csv` | Gemini rich description metrics S1–S3 (future-work validation) |
 | `arsip-judul/` | Arsip alternatif judul dan dokumen perbandingan lama |

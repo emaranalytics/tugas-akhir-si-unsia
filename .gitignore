@@ -18,8 +18,6 @@ venv/
 env/
 
 # Local outputs
-outputs/
-reports/
 artifacts/
 *.log
 
@@ -28,4 +26,3 @@ artifacts/
 Thumbs.db
 .idea/
 .vscode/
-

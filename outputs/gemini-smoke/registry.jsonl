@@ -1,0 +1,1 @@
+{"mode": "registry", "scenario": "S1", "query_id": "q001", "query_type": "single_domain", "total_tools": 30, "visible_tools": 3, "expected_tool": "inventory_check_stock", "selected_tool": "inventory_check_stock", "is_correct": true, "input_tokens": 103, "output_tokens": 5, "total_tokens": 108, "latency_ms": 833.081, "registry_memory_bytes": 21966, "backend": "gemini"}

@@ -1,0 +1,6 @@
+scenario,mode,total_tools,avg_visible_tools,avg_total_tokens,std_total_tokens,accuracy,std_accuracy,latency_p50_ms,latency_p95_ms,latency_mean_ms,std_latency_ms,registry_memory_bytes,runs
+S1,baseline,30,30,2426.0,4.933,0.3333,0.4714,1097.277,2751.575,1339.805,633.742,0,18
+S1,registry,30,10.833,908.667,152.275,0.5,0.5,880.463,1016.155,887.71,105.66,22662,18
+S2,baseline,100,100,7984.455,4.48,0.2727,0.4454,900.927,1310.173,953.166,182.339,0,33
+S2,registry,100,15,1227.273,18.965,0.3636,0.481,964.6,1471.92,993.371,248.063,71971,33
+S3,registry,300,15,1235.444,26.885,0.5,0.5,910.761,1368.206,933.693,218.518,205354,54

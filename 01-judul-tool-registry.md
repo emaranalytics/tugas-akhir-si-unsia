@@ -294,6 +294,31 @@ Subclass yang sudah ada di SDK:
 
 Penelitian ini akan membangun **`ZerloToolset(AbstractToolset)`** sebagai turunan kustom yang membaca dari **`ToolRegistry`** internal.
 
+#### 8.6.1 Posisi zerlo.id Tool Registry terhadap Native Pydantic AI
+
+Penting untuk memahami bahwa zerlo.id Tool Registry **tidak menggantikan** mekanisme toolset native Pydantic AI — keduanya beroperasi pada lapisan yang berbeda dan bersifat komplementer:
+
+```
+Pydantic AI Native Layer
+├── ToolDefinition (name, description from docstring, parameters from type hints)
+├── FilteredToolset (simple predicate: include/exclude tools)
+└── agent.run(toolsets=[...]) — injects the filtered tool list at call time
+
+zerlo.id Tool Registry (sits ON TOP)
+├── ToolMeta(module, role, tier, keywords, priority)  ← business rules
+├── @register decorator — catalogues tools at startup
+├── registry_filter(query, budget) — scores + ranks: RBAC + tier + keyword overlap
+└── feeds result into Pydantic AI's agent as the visible toolset per turn
+```
+
+`FilteredToolset` bawaan Pydantic AI menggunakan *simple predicate* (include/exclude) — tidak memiliki konsep RBAC, tier gating, semantic keyword scoring, atau budget cap. zerlo.id memperluas mekanisme ini dengan lapisan aturan bisnis multi-kriteria yang berjalan sebelum Pydantic AI melihat daftar tool.
+
+#### 8.6.2 Rantai Deskripsi: Docstring → ToolDefinition → FunctionDeclaration
+
+Satu detail implementasi yang kritis dan dikonfirmasi oleh eksperimen penelitian ini: Python docstring (`"""..."""`) pada setiap service function di zerlo.id menjadi field `description` dalam `ToolDefinition` Pydantic AI, yang kemudian menjadi field `description` dalam `FunctionDeclaration` Gemini. Rantai ini berarti **kualitas deskripsi secara langsung memengaruhi akurasi pemilihan tool oleh LLM**.
+
+Kegagalan sistematis yang ditemukan dalam eksperimen (empty parameter schemas + deskripsi yang terlalu pendek) mengkonfirmasi rantai ini: ketika deskripsi tidak memiliki konten semantik yang cukup, LLM tidak dapat membedakan antara tool dalam modul yang sama. Ini menjadi justifikasi mengapa standarisasi docstring tool adalah bagian integral dari Tool Registry — bukan sekadar dokumentasi.
+
 ### 8.7 Penelitian Terdahulu
 
 | Penulis | Tahun | Topik | Relevansi |
@@ -304,6 +329,7 @@ Penelitian ini akan membangun **`ZerloToolset(AbstractToolset)`** sebagai turuna
 | Schick et al. (Toolformer) | 2023 | LLM dilatih self-call tool | Konseptual, bukan production engineering |
 | Liu et al. (Lost in the Middle) | 2024 | Empirical context rot | Justifikasi mengapa pruning tool penting |
 | Pydantic | 2024 | Pydantic AI documentation | SDK yang dipakai |
+| Pydantic AI (SDK) | 2024–2025 | `FilteredToolset` — native predicate filtering | Menyediakan include/exclude tool secara native, namun **tidak** memiliki RBAC, tier gating, semantic scoring, atau budget cap — kontribusi penelitian ini adalah lapisan multi-kriteria di atasnya |
 
 **Kebaruan penelitian ini**: studi *applied engineering* pertama (sepengetahuan penulis) yang menggabungkan Tool Registry deterministik + 4-level orchestration + pengukuran kuantitatif pada Pydantic AI 1.x untuk konteks ERP enterprise.
 
@@ -343,6 +369,8 @@ graph TB
     ZT --> FT --> PT
     PT --> AG
 ```
+
+**Catatan posisi arsitektur**: Layer 1 (Tool Registry) dan Layer 2 (ZerloToolset) bersama-sama membentuk **business-policy layer** yang membungkus mekanisme toolset native Pydantic AI. Pydantic AI sendiri hanya menyediakan `FilteredToolset` dengan simple predicate; dua layer di atas-nya itulah yang menambahkan RBAC, tier gating, keyword scoring, dan budget cap sebagai aturan bisnis zerlo.id.
 
 ### 9.2 Layer 1 — `ToolRegistry` + `ToolMeta`
 
@@ -931,7 +959,7 @@ Phase 5 — Analisis (2 minggu)
 | 2.2 Context Engineering & Context Rot | Anthropic 2024, Liu et al. 2024 |
 | 2.3 Tool RAG | Gorilla, ToolLLM — pendekatan alternatif |
 | 2.4 Hierarchical Multi-Agent Systems | AutoGen, CAMEL, Talebirad & Nadiri |
-| 2.5 Pydantic AI Native Toolsets API | AbstractToolset, FilteredToolset, PreparedToolset |
+| 2.5 Pydantic AI Native Toolsets API vs zerlo.id Tool Registry Policy Layer | AbstractToolset, FilteredToolset (simple predicate) — dan bagaimana zerlo.id Tool Registry berdiri di atasnya sebagai lapisan multi-kriteria bisnis |
 | 2.6 Bridge over Migrate Pattern | Fowler 2012 |
 | 2.7 Software Engineering Metrics | Latency, throughput, memory profiling |
 | 2.8 Penelitian Terdahulu | Tabel komparasi (§8.7) |
