@@ -1,6 +1,6 @@
 # Persiapan Tugas Akhir — zerlo.id
 
-![Status](https://img.shields.io/badge/Status-Draft%20Bimbingan-yellow)
+![Status](https://img.shields.io/badge/Status-Judul%20Dipilih-brightgreen)
 ![Versi](https://img.shields.io/badge/Versi-1.0-blue)
 ![Program Studi](https://img.shields.io/badge/Prodi-PJJ%20Sistem%20Informasi-informational)
 ![Perguruan Tinggi](https://img.shields.io/badge/PT-Universitas%20Siber%20Asia-blueviolet)
@@ -45,21 +45,18 @@ dimulai.
 
 ---
 
-## 2. Daftar File
+## 2. Daftar File Aktif
 
 | No | File | Isi Singkat | Audiens Utama | Estimasi Baca |
 |----|------|-------------|---------------|---------------|
 | 0 | `README.md` | Index navigasi dan panduan baca | Dospem dan Mahasiswa | 5 menit |
 | 1 | `00-ringkasan-project-zerlo.md` | Overview project zerlo.id, stack teknologi, fitur utama | Dospem dan Mahasiswa | 15 menit |
-| 2 | `01-kandidat-judul-A-engineering.md` | Arah A — Rancang Bangun Sistem (umum, aman) | Dospem | 20 menit |
-| 3 | `02-kandidat-judul-B-tool-registry.md` | Arah B — Tool Registry dan Multi-Agent (rekomendasi utama) | Dospem dan Mahasiswa | 25 menit |
-| 4 | `03-kandidat-judul-C-security.md` | Arah C — Security dan Prompt Injection Defense | Dospem | 20 menit |
-| 5 | `04-perbandingan-3-arah.md` | Komparasi tiga arah dan rekomendasi tegas | Dospem dan Mahasiswa | 15 menit |
-| 6 | `05-pertanyaan-untuk-dospem.md` | Daftar pertanyaan terstruktur untuk sesi bimbingan | Mahasiswa | 10 menit |
+| 2 | `01-judul-tool-registry.md` | Detail judul terpilih — Tool Registry untuk Skalabilitas AI Agent | Dospem dan Mahasiswa | 25 menit |
+| 3 | `02-keputusan-judul-final.md` | Keputusan judul final, fokus penelitian, metrik evaluasi | Dospem dan Mahasiswa | 10 menit |
+| 4 | `03-pertanyaan-untuk-dospem.md` | Daftar pertanyaan terstruktur untuk sesi bimbingan | Mahasiswa | 10 menit |
 
-**Total estimasi waktu baca**: sekitar 110 menit untuk pembacaan
-lengkap, atau 60 menit untuk pembacaan selektif sesuai urutan yang
-disarankan di Section 3.
+Dokumen alternatif judul sebelumnya telah dipindahkan ke folder
+`arsip-judul/` agar folder aktif tetap fokus pada judul yang dipilih.
 
 ---
 
@@ -75,11 +72,11 @@ memahami konteks dan langsung fokus pada keputusan strategis.
 
 1. **README.md** — memahami struktur folder dan tujuan dokumen
 2. **00-ringkasan-project-zerlo.md** — memahami konteks project
-3. **04-perbandingan-3-arah.md** — melihat ringkasan tiga arah
-4. **01, 02, atau 03** — membaca detail arah sesuai minat dan
-   kesesuaian bidang dospem (boleh dibaca selektif, tidak wajib
-   ketiganya)
-5. **05-pertanyaan-untuk-dospem.md** — melihat daftar pertanyaan
+3. **02-keputusan-judul-final.md** — melihat judul final dan alasan
+   pemilihan
+4. **01-judul-tool-registry.md** — membaca detail teknis,
+   rumusan masalah, metodologi, dan eksperimen
+5. **03-pertanyaan-untuk-dospem.md** — melihat daftar pertanyaan
    yang akan diajukan mahasiswa
 
 **Estimasi waktu untuk dospem**: 45-60 menit (pembacaan selektif).
@@ -90,13 +87,10 @@ Urutan ini dirancang agar mahasiswa memiliki pemahaman menyeluruh
 sebelum sesi bimbingan.
 
 1. **00-ringkasan-project-zerlo.md** — pemantapan konteks project
-2. **01-kandidat-judul-A-engineering.md** — memahami opsi paling aman
-3. **02-kandidat-judul-B-tool-registry.md** — memahami opsi
-   rekomendasi utama
-4. **03-kandidat-judul-C-security.md** — memahami opsi paling
-   kontemporer
-5. **04-perbandingan-3-arah.md** — menyusun argumen pemilihan
-6. **05-pertanyaan-untuk-dospem.md** — persiapan akhir sebelum
+2. **02-keputusan-judul-final.md** — memahami keputusan judul final
+3. **01-judul-tool-registry.md** — memahami detail
+   penelitian Tool Registry
+4. **03-pertanyaan-untuk-dospem.md** — persiapan akhir sebelum
    bimbingan
 
 **Estimasi waktu untuk mahasiswa**: sekitar 110 menit (pembacaan
@@ -105,44 +99,23 @@ bimbingan).
 
 ---
 
-## 4. Ringkasan Tiga Arah Kandidat Tugas Akhir
+## 4. Judul Tugas Akhir yang Dipilih
 
-Berikut adalah ringkasan singkat dari ketiga arah kandidat. Detail
-masing-masing arah dapat dibaca pada file 01, 02, dan 03.
+> **"Implementasi dan Evaluasi Tool Registry untuk Skalabilitas AI Agent
+> Multi-Modul pada Platform ERP Restoran zerlo.id"**
 
-### 4.1. Arah A — Rancang Bangun Sistem (Engineering)
+Judul ini berfokus pada kontribusi orisinal terhadap skalabilitas
+sistem AI Agent multi-modul, khususnya pola **Tool Registry** yang
+dikembangkan pada project zerlo.id. Pendekatan yang digunakan adalah
+eksperimen kuantitatif dengan metrik token consumption, latency, dan
+accuracy. *Multi-agent orchestration* tetap dibahas sebagai konteks
+implementasi, tetapi judul dibuat lebih fokus pada Tool Registry agar
+lebih mudah dipertahankan dalam ranah Sistem Informasi. Arah ini juga
+sejalan dengan dokumentasi resmi Pydantic AI tentang *toolsets* dan
+multi-agent applications, serta dokumentasi Google Vertex AI tentang
+*function calling* untuk menghubungkan LLM dengan sistem eksternal.
 
-Arah ini mengusung topik klasik Rekayasa Perangkat Lunak: rancang
-bangun sistem ERP untuk UMKM sektor Food and Beverage. Pendekatan
-yang digunakan adalah deskriptif rancang bangun dengan metodologi
-SDLC konvensional. Arah ini paling aman dari sisi metodologi dan
-familiar bagi sebagian besar dosen pembimbing, namun cenderung
-kurang menonjolkan keunggulan teknis dari project zerlo.id.
-
-### 4.2. Arah B — Tool Registry dan Multi-Agent Architecture
-
-Arah ini berfokus pada kontribusi orisinal terhadap pola arsitektur
-multi-agen, khususnya pada pola **Tool Registry** yang dikembangkan
-secara mandiri oleh mahasiswa pada project zerlo.id. Pendekatan
-yang digunakan adalah eksperimen kuantitatif dengan metrik token
-consumption, latency, dan accuracy. Arah ini menawarkan kontribusi
-ilmiah yang lebih tinggi dan sesuai dengan tren penelitian terkini
-di bidang Large Language Model.
-
-### 4.3. Arah C — Security dan Prompt Injection Defense
-
-Arah ini berfokus pada perancangan dan evaluasi sistem pertahanan
-berlapis (defense-in-depth) terhadap serangan prompt injection
-pada arsitektur multi-agen. Pendekatan yang digunakan adalah
-eksperimen adversarial dengan corpus serangan terstruktur. Arah
-ini paling kontemporer dan relevan dengan isu keamanan AI, namun
-memiliki risiko etika dan kompleksitas eksperimen yang lebih
-tinggi.
-
-### 4.4. Rekomendasi Tegas
-
-**Mahasiswa merekomendasikan Arah B sebagai pilihan utama.**
-Alasannya, Arah B menawarkan keseimbangan optimal antara tiga
+Alasannya, judul ini menawarkan keseimbangan optimal antara tiga
 faktor: (1) kontribusi ilmiah yang terukur secara kuantitatif
 melalui metrik token, latency, dan accuracy, (2) ketersediaan
 data eksperimen yang sudah ada karena project zerlo.id sudah
@@ -152,7 +125,7 @@ Pola Tool Registry yang dikembangkan pada project ini juga
 merupakan kontribusi orisinal yang dapat dipublikasikan, sehingga
 membuka peluang pengembangan menjadi paper jurnal di masa depan.
 Detail argumen lengkap dapat dilihat pada file
-`04-perbandingan-3-arah.md`.
+`02-keputusan-judul-final.md`.
 
 ---
 
@@ -162,7 +135,7 @@ zerlo.id adalah sistem Enterprise Resource Planning berbasis AI
 yang dirancang khusus untuk UMKM sektor Food and Beverage di
 Indonesia. Sistem ini saat ini berada dalam tahap beta testing
 dan dibangun dengan stack FastAPI sebagai backend, Pydantic AI
-versi 1.83.0 sebagai framework agen, MongoDB Atlas sebagai
+sebagai framework agen, MongoDB Atlas sebagai
 database utama, dan Google Cloud Platform sebagai infrastruktur
 deployment. Arsitektur sistem mengadopsi pola Modular Monolith
 dengan Clean Architecture, terdiri dari sebelas agen AI dan tiga
@@ -178,9 +151,8 @@ pendukung lainnya. Detail lengkap project dapat dibaca pada file
 Berikut adalah daftar konkret hal-hal yang diharapkan dari dosen
 pembimbing pada sesi bimbingan pertama dan sesi-sesi berikutnya.
 
-- **Persetujuan arah judul** — keputusan final terkait apakah
-  Arah A, B, atau C yang akan diambil, atau apakah ada arah
-  alternatif yang lebih sesuai
+- **Persetujuan judul final** — konfirmasi apakah judul Tool Registry
+  sudah sesuai untuk ranah Sistem Informasi dan format akademik kampus
 - **Masukan terkait ruang lingkup** — penetapan batasan jumlah
   agen, modul, dan fitur yang akan dibahas dalam Tugas Akhir
 - **Persetujuan metodologi penelitian** — penetapan pendekatan
@@ -251,19 +223,14 @@ dari tahap persiapan hingga penyusunan proposal.
 
 ```mermaid
 flowchart TD
-    A[Mulai: Project zerlo.id<br/>sudah berjalan] --> B[Mahasiswa membaca<br/>seluruh dokumen 00-05]
+    A[Mulai: Project zerlo.id<br/>sudah berjalan] --> B[Mahasiswa membaca<br/>dokumen aktif 00-03]
     B --> C[Mahasiswa kirim<br/>dokumen ke Dospem H-1]
     C --> D[Sesi Bimbingan<br/>Pertama via Zoom]
-    D --> E{Dospem setuju<br/>arah B?}
-    E -->|Ya| F[Lanjut ke<br/>Arah B: Tool Registry]
-    E -->|Tidak, pilih A| G[Lanjut ke<br/>Arah A: Engineering]
-    E -->|Tidak, pilih C| H[Lanjut ke<br/>Arah C: Security]
-    E -->|Saran arah lain| I[Diskusi arah<br/>alternatif]
-    F --> J[Sepakati Scope<br/>dan Metodologi]
-    G --> J
-    H --> J
-    I --> J
-    J --> K[Mahasiswa Menyusun<br/>Notulen Bimbingan]
+    D --> E{Dospem setuju<br/>judul Tool Registry?}
+    E -->|Ya| F[Finalisasi Scope<br/>dan Metodologi]
+    E -->|Perlu revisi redaksi| I[Revisi wording judul<br/>tanpa mengubah fokus]
+    I --> F
+    F --> J[Mahasiswa Menyusun<br/>Notulen Bimbingan]
     K --> L[Notulen Dikonfirmasi<br/>Dospem via Email]
     L --> M[Mulai Penyusunan<br/>Proposal TA]
     M --> N[Bimbingan Berkala<br/>per Minggu/Dua Minggu]

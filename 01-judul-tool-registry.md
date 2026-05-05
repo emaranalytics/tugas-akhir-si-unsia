@@ -1,4 +1,4 @@
-# Kandidat Judul B — Tool Registry & Multi-Agent Orchestration
+# Judul Terpilih — Tool Registry untuk Skalabilitas AI Agent
 
 > Dokumen diskusi pembimbing — Tugas Akhir S1 Sistem Informasi
 > Mahasiswa: Developer utama proyek **zerlo.id** (AI-powered Restaurant ERP)
@@ -27,6 +27,8 @@
 17. [Risiko dan Mitigasi](#17-risiko-dan-mitigasi)
 18. [Estimasi Timeline](#18-estimasi-timeline)
 19. [Pertanyaan Diskusi untuk Pembimbing](#19-pertanyaan-diskusi-untuk-pembimbing)
+20. [Validasi Eksternal Terbaru](#20-validasi-eksternal-terbaru)
+21. [Catatan Akhir](#21-catatan-akhir)
 
 ---
 
@@ -34,33 +36,49 @@
 
 ### 1.1 Judul Utama
 
-> **"Implementasi Tool Registry dan Multi-Agent Orchestration pada Sistem AI Agent Pydantic AI untuk Skalabilitas Platform ERP Restoran zerlo.id"**
+> **"Implementasi dan Evaluasi Tool Registry untuk Skalabilitas AI Agent Multi-Modul pada Platform ERP Restoran zerlo.id"**
 
 **Alasan judul utama:**
 
-- Frasa **"Tool Registry"** dan **"Multi-Agent Orchestration"** secara eksplisit menunjuk pada dua kontribusi teknis utama yang akan diukur secara kuantitatif.
+- Frasa **"Tool Registry"** menjadi fokus kontribusi utama yang dapat
+  diukur secara kuantitatif, sementara *multi-agent orchestration*
+  tetap dibahas sebagai konteks arsitektur dan penerapan.
 - Kata kunci **"Skalabilitas"** menyatakan tujuan terukur: solusi harus mendukung penambahan modul dan tool tanpa degradasi performa LLM.
-- Penyebutan **"Pydantic AI"** menjamin kebaruan teknologi (versi 1.83.0, native `AbstractToolset` API).
-- Berbeda dari Kandidat A yang berorientasi *rancang bangun*, Kandidat B berorientasi **solusi terhadap masalah konkret yang dapat diukur** — sesuai dengan tradisi penelitian *applied computer science*.
+- Frasa **"AI Agent Multi-Modul"** lebih mudah diterima dalam konteks
+  Sistem Informasi dibanding judul yang terlalu padat dengan istilah
+  teknis seperti *orchestration*, tetapi tetap menjaga kebaruan topik.
+- Pydantic AI tetap disebut dalam isi penelitian sebagai framework
+  implementasi, bukan di judul, agar judul tidak terlalu bergantung
+  pada versi teknologi tertentu.
+- Judul ini berorientasi pada **solusi terhadap masalah konkret yang
+  dapat diukur** — sesuai dengan tradisi penelitian *applied computer
+  science* dan tetap relevan untuk Sistem Informasi.
 
 ### 1.2 Judul Alternatif
 
 | # | Judul Alternatif | Penekanan |
 |---|------------------|-----------|
-| A | "Optimasi Pemilihan Tool LLM melalui Tool Registry dan Hierarchical Multi-Agent pada Sistem AI Agent Berbasis Pydantic AI" | Penekanan pada **optimasi** (kata kunci favorit pembimbing kuantitatif). Hierarchical Multi-Agent eksplisit. |
-| B | "Penerapan Pola Tool Registry untuk Mengatasi Token-Budget Constraint pada AI Agent Multi-Modul Sistem ERP" | Penekanan pada **constraint engineering** — paling jelas masalah-solusi-nya, namun terlalu sempit (tidak menyebut multi-agent). |
+| A | "Optimasi Pemilihan Tool LLM melalui Tool Registry pada Sistem AI Agent Multi-Modul Berbasis Pydantic AI" | Penekanan pada **optimasi** dan *tool selection accuracy*. Lebih teknis, cocok jika pembimbing menyukai eksperimen kuantitatif. |
+| B | "Penerapan Pola Tool Registry untuk Mengatasi Token-Budget Constraint pada AI Agent Multi-Modul Sistem ERP" | Penekanan pada **constraint engineering** — paling jelas masalah-solusi-nya, namun terlalu sempit bila ingin membahas orkestrasi multi-agen. |
+| C | "Evaluasi Skalabilitas Tool Registry pada Sistem AI Agent ERP Multi-Tenant: Studi Kasus zerlo.id" | Penekanan pada **evaluasi skalabilitas** dan studi kasus. Paling akademik dan relatif aman untuk Sistem Informasi. |
 
 ### 1.3 Catatan Pemilihan Judul
 
-Mahasiswa cenderung pada judul utama karena menyatukan dua kontribusi (Tool Registry **dan** Multi-Agent Orchestration) secara seimbang. Bila pembimbing menginginkan fokus tunggal, judul alternatif (B) yang paling tajam.
+Mahasiswa cenderung pada judul utama karena lebih mudah dipertahankan
+di sidang S1 Sistem Informasi: fokusnya satu, yaitu **Tool Registry**,
+tetapi ruang pembahasannya tetap cukup luas untuk memasukkan
+*multi-agent orchestration*, RBAC, *token budget*, dan evaluasi
+kuantitatif. Bila pembimbing meminta judul yang lebih akademik, judul
+alternatif C dapat digunakan. Bila pembimbing menginginkan fokus teknis
+yang lebih tajam, judul alternatif B dapat digunakan.
 
 ---
 
 ## 2. Ringkasan / Pitch
 
-Penelitian ini mengatasi masalah skalabilitas pada sistem AI Agent berbasis LLM ketika jumlah *tool* yang tersedia melebihi *context window* model. Pada platform ERP zerlo.id dengan **38 modul, 1.176 endpoint, dan ~4.000 fungsi yang berpotensi menjadi tool LLM**, tidak mungkin memuat semua tool ke LLM per *inference call*: total skema (~360.000 token) jauh melebihi context window Gemini 2.5 Flash (1 juta token, *namun* akurasi tool selection turun drastis di atas ~40 visible tools).
+Penelitian ini mengatasi masalah skalabilitas pada sistem AI Agent berbasis LLM ketika jumlah *tool* yang tersedia terus bertambah seiring pertumbuhan modul ERP. Pada platform ERP zerlo.id dengan **38 modul, 1.176 endpoint, dan ~4.000 fungsi yang berpotensi menjadi tool LLM**, memuat semua tool ke LLM per *inference call* tidak praktis: sebagian besar konteks akan habis untuk skema tool, sementara akurasi pemilihan tool dapat menurun ketika terlalu banyak tool terlihat oleh model.
 
-Penelitian mengusulkan dan menguji **Tool Registry pattern** — sebuah lapisan abstraksi typed metadata + decorator (`@register(meta=ToolMeta(...))`) di atas Pydantic AI 1.83 native `AbstractToolset`, yang memfilter tool secara dinamis berdasarkan: (1) modul yang dibutuhkan agen, (2) role pengguna (RBAC), (3) tier subscription, (4) anggaran token (max 15 tools per turn dengan prioritas read > analytical > write > admin). Ditambah **Multi-Agent Orchestration 4 Level**: *single*, *delegation* (shared `ctx.usage`), *programmatic hand-off* (independent budget), dan *workflow graph* (`pydantic-graph`) untuk multi-step state machine.
+Penelitian mengusulkan dan menguji **Tool Registry pattern** — sebuah lapisan abstraksi typed metadata + decorator (`@register(meta=ToolMeta(...))`) di atas API toolset Pydantic AI, yang memfilter tool secara dinamis berdasarkan: (1) modul yang dibutuhkan agen, (2) role pengguna (RBAC), (3) tier subscription, (4) anggaran token (max 15 tools per turn dengan prioritas read > analytical > write > admin). Di atas registry tersebut, penelitian membahas **Multi-Agent Orchestration 4 Level**: *single*, *delegation* (shared `ctx.usage`), *programmatic hand-off* (independent budget), dan *workflow graph* (`pydantic-graph`) untuk multi-step state machine.
 
 Kontribusi diukur secara kuantitatif melalui eksperimen: (a) **token-per-turn** sebelum vs sesudah, (b) **tool selection accuracy** pada eval set adversarial, (c) **latency p50/p95**, (d) **memory footprint registry**, (e) **skalabilitas** (linear vs sub-linear pada penambahan modul).
 
@@ -95,7 +113,7 @@ async def get_food_cost_report(ctx, days: int = 30) -> str: ...
 Setiap kali `agent.run(message)` dipanggil, **seluruh** tool yang terikat pada agen tersebut dikirim ke LLM sebagai bagian dari *system context*. Pada skala kecil ini hemat dan sederhana. Pada skala besar, tiga masalah muncul:
 
 1. **Token Budget Explosion** — semakin banyak tool, semakin banyak token konteks tersita untuk skema tool, mengurangi ruang untuk *user message* dan *conversation history*.
-2. **Tool Selection Accuracy Degradation** — riset internal Anthropic dan Google menunjukkan akurasi tool selection menurun signifikan ketika visible tool melebihi 40–50 (Anthropic Research, 2024; Gemini Tooling FAQ, 2025).
+2. **Tool Selection Accuracy Degradation** — semakin banyak tool yang terlihat, semakin besar ruang keputusan LLM. Karena itu, strategi *context engineering* dan *tool filtering* menjadi penting sebelum model melakukan inferensi.
 3. **Cross-Module Coupling** — agen tunggal yang harus mencakup semua modul melanggar prinsip *separation of concerns*.
 
 ### 3.3 Tantangan dalam Konteks Multi-Tenant ERP
@@ -128,7 +146,7 @@ Tool Registry adalah solusi *single point of enforcement* untuk semua kebutuhan 
 | Besar (target Phase G+) | 400 | 36.000 | 3,4% | Akurasi <60% (estimasi) |
 | Penuh (target rilis komersial) | 4.000 | 360.000 | **34,3%** | Tidak praktis: 1/3 context habis sebelum user message |
 
-**Kesimpulan**: model **berhasil menampung** semua tool secara teknis (1M context window), namun **tool selection accuracy** anjlok jauh sebelum mencapai limit teknis. Anthropic (2024) melaporkan akurasi turun dari 95% (10 tools) ke ~62% (100 tools) hingga **~30% (500+ tools)** pada eval internal mereka.
+**Kesimpulan**: model modern dapat memiliki *context window* besar, namun strategi "kirim semua tool" tetap tidak ideal. Masalah utama bukan hanya batas token, melainkan biaya inferensi, latensi, kompleksitas pemilihan tool, dan risiko tool yang tidak relevan ikut terlihat oleh model.
 
 ### 4.3 Skenario Per-Modul (1 Agen per Modul)
 
@@ -160,7 +178,7 @@ Target eksperimen (lihat §13):
 
 ## 5. Rumusan Masalah
 
-1. **Bagaimana merancang lapisan abstraksi Tool Registry** di atas Pydantic AI 1.83 yang menyimpan *typed metadata* (modul, role, tier, op_type, is_write, action_type) untuk tiap tool, dan dapat dipanggil oleh agen secara dinamis?
+1. **Bagaimana merancang lapisan abstraksi Tool Registry** di atas Pydantic AI yang menyimpan *typed metadata* (modul, role, tier, op_type, is_write, action_type) untuk tiap tool, dan dapat dipanggil oleh agen secara dinamis?
 2. **Bagaimana mengintegrasikan Tool Registry dengan native `AbstractToolset` API** Pydantic AI sehingga filtering tool terjadi *server-side* sebelum LLM melihat tool definition (bukan di sisi handler)?
 3. **Bagaimana menerapkan Multi-Agent Orchestration 4 Level** (single, delegation, hand-off, graph) di atas registry tersebut untuk menangani query lintas-modul tanpa membengkakkan context window?
 4. **Bagaimana mengukur secara kuantitatif** dampak Tool Registry pada (a) token-per-turn, (b) tool selection accuracy, (c) latency p50/p95, (d) memory footprint, dan (e) skalabilitas, dibandingkan baseline naive decorator?
@@ -210,7 +228,8 @@ Target eksperimen (lihat §13):
 ### 7.3 Batasan Teknologi
 
 - Python 3.12+
-- Pydantic AI 1.83.0 (versi pinned, beta — penelitian pioneer pada API native toolset).
+- Pydantic AI versi yang dipakai project, dipin selama periode penelitian
+  agar eksperimen tidak berubah akibat perubahan API.
 - MongoDB Atlas (tidak ada perubahan dari sisi DB).
 - Eksperimen dijalankan di lingkungan dev terkontrol (bukan production traffic).
 
@@ -243,7 +262,7 @@ Penelitian ini **tidak menggunakan Tool RAG** sebagai treatment utama (terlalu k
 
 **Hierarchical Multi-Agent** (Wu et al., 2023 — AutoGen; Talebirad & Nadiri, 2023) adalah pola di mana satu *coordinator agent* mendelegasikan ke agen-agen *specialist*. Berbeda dari **flat multi-agent** (semua agen sederajat), pola hirarkis lebih cocok untuk domain enterprise di mana otoritas eksplisit (manager → staff).
 
-Pydantic AI 1.83 tidak menyediakan *coordinator agent* secara native, namun memungkinkan implementasi via:
+Pydantic AI tidak memaksa satu pola *coordinator agent* tertentu, namun memungkinkan implementasi via:
 - **Tool delegation** — agen utama memiliki tool `ask_*_expert` yang memanggil specialist.
 - **Programmatic hand-off** — orchestrator level aplikasi memutuskan kapan switch agen.
 
@@ -253,7 +272,7 @@ Pydantic AI 1.83 tidak menyediakan *coordinator agent* secara native, namun memu
 
 ### 8.6 Pydantic AI Native Toolsets API
 
-Pydantic AI 1.83 menyediakan **`AbstractToolset`** (kelas dasar) dengan tiga metode abstrak:
+Pydantic AI menyediakan API **toolset** untuk mengelompokkan dan mengelola tool yang dapat diberikan kepada agent. Pada penelitian ini, API tersebut menjadi landasan implementasi `ZerloToolset` dan registry metadata:
 
 ```python
 class AbstractToolset(ABC):
@@ -948,7 +967,9 @@ Phase 5 — Analisis (2 minggu)
 | 4.12 Pembahasan Hasil | Refleksi rumusan masalah |
 | 4.13 Threats to Validity | Statistik + LLM stochasticity |
 
-> **Bab 4 adalah value utama Kandidat B**. Berbeda dari Kandidat A yang berfokus pada *implementasi + UAT* kualitatif, Kandidat B mengukur dampak rancangan secara numerik.
+> **Bab 4 adalah value utama penelitian ini** karena dampak Tool Registry
+> dapat diukur secara numerik melalui token usage, latency, dan tool
+> selection accuracy.
 
 ### Bab 5 — Penutup
 
@@ -1007,7 +1028,7 @@ Phase 5 — Analisis (2 minggu)
 
 | # | Risiko | Dampak | Probabilitas | Mitigasi |
 |---|--------|--------|--------------|----------|
-| 1 | Pydantic AI 1.x breaking changes mid-skripsi | Tinggi | Sedang | Pin `pydantic-ai==1.83.0`; tidak upgrade selama TA |
+| 1 | Pydantic AI 1.x breaking changes mid-skripsi | Tinggi | Sedang | Pin versi dependency yang dipakai project saat proposal disetujui; tidak upgrade selama TA |
 | 2 | LLM stochasticity besar — eval tidak konsisten | Tinggi | Tinggi | 5 run per query; report mean ± stdev; paired t-test |
 | 3 | Gemini API kuota habis saat eksperimen | Tinggi | Sedang | Budget eksplisit (~USD 100); fallback ke Gemini Flash Lite |
 | 4 | Bias eval dataset (diset penulis) | Sedang | Tinggi | Validasi pemilik beta tenant + cross-check dengan log query existing |
@@ -1022,7 +1043,9 @@ Phase 5 — Analisis (2 minggu)
 
 ## 18. Estimasi Timeline
 
-Asumsi: skripsi berdurasi **6 bulan** (24 minggu), dengan ~30 jam/minggu — Kandidat B *lebih intensif* daripada Kandidat A karena ada eksperimen kuantitatif.
+Asumsi: skripsi berdurasi **6 bulan** (24 minggu), dengan ~30 jam/minggu.
+Porsi terbesar waktu digunakan untuk penyusunan eval dataset, eksperimen
+baseline/treatment, analisis statistik, dan penulisan Bab 4.
 
 | Bulan | Minggu | Aktivitas | Output |
 |-------|--------|-----------|--------|
@@ -1068,15 +1091,33 @@ Asumsi: skripsi berdurasi **6 bulan** (24 minggu), dengan ~30 jam/minggu — Kan
 5. Apakah eval dataset perlu **publik** sebagai kontribusi open-source, atau cukup lampiran skripsi?
 6. Dalam hal LLM stochasticity, apakah pembimbing memiliki preferensi mitigasi (temperature=0, deterministic seed via API, etc.)?
 7. Apakah penelitian ini memerlukan **etik review** (karena memakai data tenant beta meski sintetis)?
-8. Komparasi dengan Kandidat A (Rancang Bangun) — apakah pembimbing memiliki preferensi salah satu, atau membuka diskusi?
+8. Apakah redaksi judul perlu dibuat lebih familiar untuk Sistem
+   Informasi tanpa mengubah fokus Tool Registry?
 
 ---
 
-## 20. Catatan Akhir
+## 20. Validasi Eksternal Terbaru
 
-Kandidat B menawarkan **kontribusi penelitian yang lebih kuat secara akademik** (kuantitatif, eksperimental) dengan biaya **kompleksitas implementasi yang lebih tinggi** dibandingkan Kandidat A (rancang bangun). Mahasiswa bersedia mendiskusikan trade-off ini bersama pembimbing dan memilih sesuai preferensi *style* pembimbing.
+Validasi eksternal ini digunakan sebagai bahan penguat awal sebelum
+Bab 2 disusun dengan literatur akademik yang lebih lengkap.
 
-Apabila pembimbing menyukai *style* publikasi konferensi (banyak grafik, statistik, argumen kuantitatif), Kandidat B lebih cocok. Apabila pembimbing menyukai *style* skripsi tradisional (UML lengkap, dokumentasi rinci, UAT kualitatif), Kandidat A lebih cocok.
+| Sumber | Implikasi untuk Judul B |
+|--------|--------------------------|
+| Pydantic AI Toolsets — `https://pydantic.dev/docs/ai/api/pydantic-ai/toolsets/` | Mendukung gagasan bahwa tool perlu dikelompokkan, dikelola, dan dapat difilter sebelum diberikan kepada agent. |
+| Pydantic AI Multi-Agent Applications — `https://pydantic.dev/docs/ai/guides/multi-agent-applications/` | Mendukung pembahasan delegation, hand-off, dan graph sebagai pola penerapan multi-agent di atas registry. |
+| Google Vertex AI Function Calling — `https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/function-calling` | Mendukung framing bahwa tool/function calling adalah mekanisme LLM untuk terhubung ke API, database, dan sistem enterprise. |
+| e-Conomy SEA 2025 Indonesia — `https://services.google.com/fh/files/misc/indonesia_e_conomy_sea_2025_report.pdf` | Menguatkan latar belakang bisnis bahwa adopsi digital dan AI di Indonesia/Asia Tenggara sedang meningkat, sehingga AI-first ERP untuk UMKM relevan secara pasar. |
+| OWASP Top 10 for LLM Applications — `https://owasp.org/www-project-top-10-for-large-language-model-applications/` | Menjadi referensi pendukung untuk bagian risiko AI Agent dan *future work* keamanan. |
+
+---
+
+## 21. Catatan Akhir
+
+Judul ini menawarkan kontribusi penelitian yang kuat secara akademik
+karena memiliki artefak implementasi sekaligus evaluasi kuantitatif.
+Mahasiswa akan mempertahankan fokus pada Tool Registry, sementara
+penyesuaian yang dibuka untuk pembimbing dibatasi pada redaksi judul,
+scope eksperimen, dan metode evaluasi.
 
 > Dokumen ini akan diperbarui setelah diskusi pertama dengan pembimbing.
 > Versi: 0.1 (draft awal) — 2026-05-02

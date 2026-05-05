@@ -33,16 +33,17 @@ Menengah Sektor Kuliner: Studi Kasus zerlo.id"*
 proses rancang bangun ERP ber-AI dari analisis kebutuhan hingga
 *deployment*. Kontribusi: **artefak perangkat lunak**.
 
-### Arah B — Tool Registry & Multi-Agent Orchestration (Rekomendasi Utama)
+### Arah B — Tool Registry untuk Skalabilitas AI Agent (Rekomendasi Utama)
 
-**Judul indikatif**: *"Perancangan dan Evaluasi Tool Registry dan Multi-
-Agent Orchestration untuk Sistem AI Agent Berbasis Pydantic AI pada
-Platform ERP Multi-Tenant zerlo.id"*
+**Judul indikatif**: *"Implementasi dan Evaluasi Tool Registry untuk
+Skalabilitas AI Agent Multi-Modul pada Platform ERP Restoran zerlo.id"*
 
 **Sudut pandang**: Skalabilitas arsitektur AI Agent. Mahasiswa membandingkan
 pola *decorator-bound tool* dengan *registry-based tool*, dan
 mengevaluasi efisiensi *token*, *latency*, serta *accuracy* sebelum dan
-sesudah migrasi ke *registry*. Kontribusi: **kuantitatif**.
+sesudah migrasi ke *registry*. *Multi-agent orchestration* tetap dibahas
+sebagai konteks penerapan, bukan sebagai beban utama judul. Kontribusi:
+**kuantitatif**.
 
 ### Arah C — Security / Defense-in-Depth Prompt Injection
 
@@ -140,7 +141,7 @@ graph LR
    menggunakan 11 *agent* AI menjadi sekadar *fitur* daripada inti
    kontribusi.
 
-### 3.2 Arah B — Tool Registry & Multi-Agent Orchestration
+### 3.2 Arah B — Tool Registry untuk Skalabilitas AI Agent
 
 #### Kekuatan
 
@@ -157,9 +158,12 @@ graph LR
 3. **Design document lengkap**. `tool-registry-design.md` di repository
    sudah mencakup *rationale*, alternatif, dan *trade-off* — basis Bab 2
    dan Bab 3 sudah tersedia.
-4. **Kontemporer 2025–2026**. Pola *multi-agent orchestration* sedang
-   berkembang dalam literatur (paper *Multi-Agent Collaboration*, *Agent
-   Workflow Memory*) — relevan tapi tidak terlalu eksotis.
+4. **Tervalidasi oleh arah teknologi 2025–2026**. Dokumentasi resmi
+   Pydantic AI menyediakan konsep *toolsets* dan pola aplikasi
+   multi-agent, sementara dokumentasi Google Vertex AI menempatkan
+   *function calling* sebagai cara LLM mengakses sistem eksternal seperti
+   basis data dan aplikasi enterprise. Ini membuat topik Tool Registry
+   relevan untuk Sistem Informasi, bukan sekadar eksperimen AI.
 5. **Skor Bab 4 tinggi**. Tabel-tabel pengukuran *token*, *latency*,
    *accuracy* sebelum/sesudah migrasi memberi konten substantif untuk
    Bab 4.
@@ -261,8 +265,8 @@ graph TD
 
 ## 5. Rekomendasi Mahasiswa
 
-> **Mahasiswa merekomendasikan Arah B — Tool Registry & Multi-Agent
-> Orchestration** sebagai arah utama Tugas Akhir.
+> **Mahasiswa merekomendasikan Arah B — Tool Registry untuk Skalabilitas
+> AI Agent Multi-Modul** sebagai arah utama Tugas Akhir.
 
 Argumen:
 
@@ -299,9 +303,12 @@ basis kode + *log* + *trace* lengkap. Phase yang sudah *live*:
 ### 5.3 Kontemporer Tetapi Tidak Eksotis
 
 Topik *multi-agent orchestration* sedang muncul di literatur 2024–2026
-(AutoGen, LangGraph, Pydantic Graph), tetapi pola dasar (*registry*,
-*budget cap*, *priority sort*) sudah dikenal di *systems engineering*
-sejak lama. Penguji tidak akan merasa terlalu asing.
+(AutoGen, LangGraph, Pydantic Graph), tetapi judul yang direkomendasikan
+dibuat lebih aman dengan menjadikan **Tool Registry** sebagai fokus
+utama. Pola dasar (*registry*, *budget cap*, *priority sort*) sudah
+dikenal di *systems engineering*, sementara API modern seperti
+Pydantic AI *toolsets* dan Google Vertex AI *function calling* memvalidasi
+bahwa pengelolaan tool adalah problem nyata pada aplikasi LLM enterprise.
 
 ### 5.4 Design Document Sudah Ada
 
@@ -390,7 +397,7 @@ lengkap berserta argumen pendukung berada di file terpisah
 ## 8. Kesimpulan
 
 Tiga arah Tugas Akhir telah dianalisis secara komprehensif. **Arah B —
-Tool Registry & Multi-Agent Orchestration** menempati posisi paling
+Tool Registry untuk Skalabilitas AI Agent Multi-Modul** menempati posisi paling
 seimbang antara originalitas, kekuatan kuantitatif, dan tingkat risiko
 sidang. Arah ini memanfaatkan keunikan platform zerlo.id sebagai sistem
 AI Agent multi-tenant *production-grade*, dengan *deliverable* yang
@@ -420,3 +427,13 @@ yang produktif.
 | `03-kandidat-judul-C-security.md` | Detail Arah C |
 | `04-perbandingan-3-arah.md` | Dokumen ini |
 | `05-pertanyaan-untuk-dospem.md` | Daftar pertanyaan lengkap untuk Zoom |
+
+## Lampiran — Sumber Validasi Eksternal
+
+| Sumber | Relevansi |
+|--------|-----------|
+| Pydantic AI Documentation — Toolsets (`https://pydantic.dev/docs/ai/api/pydantic-ai/toolsets/`) | Memvalidasi bahwa pengelompokan, pemfilteran, dan pengelolaan tool adalah fitur resmi yang relevan untuk implementasi Tool Registry. |
+| Pydantic AI Documentation — Multi-Agent Applications (`https://pydantic.dev/docs/ai/guides/multi-agent-applications/`) | Memvalidasi pola delegation, hand-off, dan graph sebagai konteks penerapan multi-agent. |
+| Google Vertex AI Documentation — Function Calling (`https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/function-calling`) | Memvalidasi bahwa LLM dapat dihubungkan ke basis data, API, dan sistem eksternal melalui tool/function calling. |
+| e-Conomy SEA 2025 Indonesia Report (`https://services.google.com/fh/files/misc/indonesia_e_conomy_sea_2025_report.pdf`) | Memperkuat konteks bisnis bahwa adopsi digital dan AI di Indonesia/SEA sedang bergerak cepat, termasuk untuk layanan digital dan UMKM. |
+| OWASP Top 10 for LLM Applications (`https://owasp.org/www-project-top-10-for-large-language-model-applications/`) | Memvalidasi Arah C sebagai topik keamanan yang kuat, tetapi tetap lebih berisiko untuk prioritas utama skripsi S1 SI. |
