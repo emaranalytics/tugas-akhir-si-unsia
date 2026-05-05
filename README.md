@@ -1,15 +1,34 @@
 # Persiapan Tugas Akhir — zerlo.id
 
-![Status](https://img.shields.io/badge/Status-Evaluasi%20Berjalan-brightgreen)
-![Versi](https://img.shields.io/badge/Versi-1.3-blue)
+<!-- Status -->
+![Status](https://img.shields.io/badge/Status-Eksperimen%20Selesai-brightgreen)
+![Versi](https://img.shields.io/badge/Versi-1.5-blue)
 ![Program Studi](https://img.shields.io/badge/Prodi-PJJ%20Sistem%20Informasi-informational)
 ![Perguruan Tinggi](https://img.shields.io/badge/PT-Universitas%20Siber%20Asia-blueviolet)
 ![Semester](https://img.shields.io/badge/Semester-8-orange)
-![Rekomendasi](https://img.shields.io/badge/Arah%20Utama-Arah%20B%3A%20Tool%20Registry-brightgreen)
+
+<!-- Experiment stack -->
+![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
+![Gemini](https://img.shields.io/badge/Gemini-2.5--Flash--Lite-4285F4?logo=google&logoColor=white)
+![Google Gen AI SDK](https://img.shields.io/badge/Google%20Gen%20AI%20SDK-native%20FC-4285F4?logo=googlecloud&logoColor=white)
+![Pydantic AI](https://img.shields.io/badge/Pydantic%20AI-FilteredToolset-E92063?logo=pydantic&logoColor=white)
+![scipy](https://img.shields.io/badge/scipy-Wilcoxon%20%7C%20Cohen's%20d-8CAAE6?logo=scipy&logoColor=white)
+![matplotlib](https://img.shields.io/badge/matplotlib-charts-11557C?logo=python&logoColor=white)
+
+<!-- zerlo.id production stack -->
+![FastAPI](https://img.shields.io/badge/FastAPI-zerlo.id%20backend-009688?logo=fastapi&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)
+![GCP](https://img.shields.io/badge/Google%20Cloud-deployment-4285F4?logo=googlecloud&logoColor=white)
+
+<!-- Experiment results -->
+![Dataset](https://img.shields.io/badge/Eval%20Dataset-100%20queries-brightgreen)
+![Records](https://img.shields.io/badge/Experiment%20Records-n%3D558-brightgreen)
+![Token Reduction](https://img.shields.io/badge/Token%20Reduction-up%20to%20−95%25-success)
+![Wilcoxon](https://img.shields.io/badge/Wilcoxon%20p-<0.0001-success)
 
 **Tanggal Pembuatan**: 2 Mei 2026
-**Versi Dokumen**: 1.3
-**Status**: Evaluasi Selesai — Synthetic S1–S4 + Gemini Native Function Calling S1–S3
+**Versi Dokumen**: 1.5
+**Status**: Eksperimen Selesai — Synthetic S1–S4 + Gemini Native v2 (100 query, S1–S3 full, n=558)
 
 ---
 
@@ -543,6 +562,7 @@ ke dosen pembimbing.
 | 1.2 | 5 Mei 2026 | Update seksi 3b dengan hasil eksperimen Gemini compact router (n=210) |
 | 1.3 | 5 Mei 2026 | Update hasil resmi: Gemini native function calling (n=156, S1–S3) — token reduction 61–84%, registry accuracy +16–18pp vs baseline |
 | 1.4 | 5 Mei 2026 | Tambah eksperimen gemini-rich: ToolDef.intent + docstring-style descriptions — temuan: template generik menurunkan akurasi, kualitas deskripsi = keunikan per tool |
+| 1.5 | 5 Mei 2026 | Dataset diperluas ke 100 query; uji statistik Wilcoxon+Cohen's d; S3 baseline dijalankan (n=558); Bab 5 threats draft; badges diperbarui |
 
 ---
 
