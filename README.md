@@ -25,10 +25,12 @@
 ![Records](https://img.shields.io/badge/Experiment%20Records-n%3D558-brightgreen)
 ![Token Reduction](https://img.shields.io/badge/Token%20Reduction-up%20to%20−95%25-success)
 ![Wilcoxon](https://img.shields.io/badge/Wilcoxon%20p-<0.0001-success)
+![Simulation](https://img.shields.io/badge/Simulasi%20Interaktif-HTML%2FCSS%2FJS-orange)
+![Bab](https://img.shields.io/badge/Naskah-Bab%201%20selesai-brightgreen)
 
 **Tanggal Pembuatan**: 2 Mei 2026
-**Versi Dokumen**: 1.6
-**Status**: Multi-model comparison in progress — Gemini Native v2 (official, n=558) + MiniMax-M2.7 (S1–S2 selesai) + Claude Sonnet 4.6 (direncanakan)
+**Versi Dokumen**: 1.7
+**Status**: Naskah dimulai — Bab 1 selesai; simulasi interaktif tersedia di `simulation/`; Gemini Native v2 (official, n=558) adalah hasil resmi
 
 ---
 
@@ -233,6 +235,8 @@ panggilan tetap).
 
 ## 2. Daftar File Aktif
 
+### Dokumen Perencanaan & Bimbingan
+
 | No | File | Isi Singkat | Audiens Utama | Estimasi Baca |
 |----|------|-------------|---------------|---------------|
 | 0 | `README.md` | Index navigasi dan panduan baca | Dospem dan Mahasiswa | 5 menit |
@@ -241,9 +245,31 @@ panggilan tetap).
 | 3 | `02-keputusan-judul-final.md` | Keputusan judul final, fokus penelitian, metrik evaluasi, temuan evaluasi | Dospem dan Mahasiswa | 10 menit |
 | 4 | `03-pertanyaan-untuk-dospem.md` | Daftar pertanyaan terstruktur untuk sesi bimbingan | Mahasiswa | 10 menit |
 | 5 | `plan/01-dev-plan-evaluasi-tool-registry.md` | Rencana implementasi codebase evaluasi, status aktual, dan roadmap perbaikan ilmiah | Mahasiswa | 15 menit |
+
+### Laporan Eksperimen
+
+| No | File | Isi Singkat | Audiens Utama | Estimasi Baca |
+|----|------|-------------|---------------|---------------|
 | 6 | `reports/tool-registry-eval/report.md` | Laporan benchmark synthetic S1–S4 | Dospem dan Mahasiswa | 10 menit |
-| 7 | `reports/tool-registry-eval-gemini-native-v2/report.md` | Laporan Gemini native FC v2 S1–S3 + failure analysis (hasil resmi) | Dospem dan Mahasiswa | 15 menit |
+| 7 | `reports/tool-registry-eval-gemini-native-v2/report.md` | Laporan Gemini native FC v2 S1–S3 + failure analysis **(hasil resmi)** | Dospem dan Mahasiswa | 15 menit |
 | 8 | `reports/tool-registry-eval-gemini-rich/report.md` | Laporan eksperimen deskripsi kaya — validasi future-work description quality | Mahasiswa | 10 menit |
+
+### Naskah Tugas Akhir
+
+| No | File | Isi Singkat | Status |
+|----|------|-------------|--------|
+| 9 | `bab/bab-1-pendahuluan.md` | Bab I — Pendahuluan (latar belakang, rumusan masalah, tujuan, metode) | ✅ Selesai |
+| 10 | `bab/bab-2-landasan.md` | Bab II — Landasan Teori & Tinjauan Pustaka | 📋 Belum |
+| 11 | `bab/bab-3-implementasi.md` | Bab III — Implementasi Metode Usulan | 📋 Belum |
+| 12 | `bab/bab-4-hasil.md` | Bab IV — Hasil dan Analisa | 📋 Belum |
+| 13 | `bab/bab-5-kesimpulan.md` | Bab V — Kesimpulan dan Saran | 📋 Belum |
+
+### Simulasi Interaktif
+
+| No | File | Isi Singkat | Cara Buka |
+|----|------|-------------|-----------|
+| 14 | `simulation/index.html` | Simulasi 3 pendekatan: Baseline vs Tool Registry vs Tool RAG | Buka langsung di browser |
+| 15 | `simulation/diagram.html` | Diagram arsitektur + decision matrix ketiga pendekatan | Link dari halaman simulasi |
 
 Dokumen alternatif judul sebelumnya telah dipindahkan ke folder
 `arsip-judul/` agar folder aktif tetap fokus pada judul yang dipilih.
@@ -289,7 +315,7 @@ bimbingan).
 
 ---
 
-## 3b. Status Evaluasi (per 5 Mei 2026)
+## 3b. Status Evaluasi dan Penulisan (per 25 Mei 2026)
 
 Tiga set eksperimen selesai. Hasil resmi adalah eksperimen native function calling.
 
@@ -364,7 +390,9 @@ Env vars utama: `EVAL_BACKEND`, `EVAL_MAX_SCENARIO`, `EVAL_BASELINE_MAX_SCENARIO
 ✅ Dataset 100 query (50/30/20) — selesai, dikodekan di `catalog.py`  
 ✅ Uji statistik Wilcoxon + Cohen's d + 95% CI — selesai, di `measure.py`; output: `statistical_tests.csv`  
 ✅ S3 baseline — selesai, tersedia di `outputs/gemini-native-v2/`  
-✅ Draft Bab 5 threats to validity — selesai, di `plan/02-bab5-threats-to-validity.md`
+✅ Draft Bab 5 threats to validity — selesai, di `plan/02-bab5-threats-to-validity.md`  
+✅ Bab I Pendahuluan — selesai, di `bab/bab-1-pendahuluan.md`  
+✅ Simulasi interaktif — selesai, di `simulation/` (Baseline, Registry, RAG, Perbandingan + Diagram Arsitektur)
 
 ---
 
@@ -444,9 +472,9 @@ pembimbing pada sesi bimbingan pertama dan sesi-sesi berikutnya.
 
 | Atribut | Nilai |
 |---------|-------|
-| Versi | 1.0 |
-| Tanggal | 2 Mei 2026 |
-| Status | Draft untuk Bimbingan |
+| Versi | 1.7 |
+| Tanggal | 25 Mei 2026 |
+| Status | Penulisan naskah — Bab I selesai |
 | Penulis | Muhammad Ridwan |
 | Reviewer | [Nama Dosen Pembimbing] |
 | Tanggal Review Terakhir | — (belum direview) |
@@ -564,6 +592,7 @@ ke dosen pembimbing.
 | 1.4 | 5 Mei 2026 | Tambah eksperimen gemini-rich: ToolDef.intent + docstring-style descriptions — temuan: template generik menurunkan akurasi, kualitas deskripsi = keunikan per tool |
 | 1.5 | 5 Mei 2026 | Dataset diperluas ke 100 query; uji statistik Wilcoxon+Cohen's d; S3 baseline dijalankan (n=558); Bab 5 threats draft; badges diperbarui |
 | 1.6 | 25 Mei 2026 | Tambah multi-model comparison: MiniMax-M2.7 (S1–S2 selesai) dan Claude Sonnet 4.6 (direncanakan); refaktor backends/ terpisah; resume support pada runner (append mode + skip-done); judul dikunci final |
+| 1.7 | 25 Mei 2026 | Mulai penulisan naskah: Bab I Pendahuluan selesai (`bab/`); simulasi interaktif HTML/CSS/JS (`simulation/`) dengan 4 tab (Baseline, Registry, RAG, Perbandingan) + halaman diagram arsitektur; perbaiki visualisasi skalabilitas O(N) vs O(1) |
 
 ---
 

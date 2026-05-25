@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Tool Registry — zerlo.id AI-ERP</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ═══ HEADER ══════════════════════════════════════════════════════════════ -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-title">
+        <h1>Simulasi Interaktif: Strategi Tool Management untuk AI Agent ERP</h1>
+        <p class="header-sub">
+          Tugas Akhir · Universitas Siber Asia · Muhammad Ridwan (220101010009) ·
+          "Implementasi dan Evaluasi Tool Registry untuk Skalabilitas AI Agent Multi-Modul pada Platform ERP Restoran zerlo.id"
+        </p>
+      </div>
+      <a href="diagram.html" class="btn-help" style="text-decoration:none;margin-right:6px">📐 Diagram Arsitektur</a>
+      <button class="btn-help" id="helpBtn">❓ Petunjuk</button>
+    </div>
+  </header>
+
+  <!-- ═══ TABS ═════════════════════════════════════════════════════════════════ -->
+  <nav class="tabs">
+    <button class="tab active" data-tab="baseline">
+      <span>⚠️</span>
+      <div>
+        <strong>Baseline</strong>
+        <small>Semua Tools Dimuat</small>
+      </div>
+    </button>
+    <button class="tab" data-tab="registry">
+      <span>🗂️</span>
+      <div>
+        <strong>Tool Registry</strong>
+        <small>Filter Metadata</small>
+      </div>
+    </button>
+    <button class="tab" data-tab="rag">
+      <span>🔍</span>
+      <div>
+        <strong>Tool RAG</strong>
+        <small>Pencarian Semantik</small>
+      </div>
+    </button>
+    <button class="tab" data-tab="comparison">
+      <span>📊</span>
+      <div>
+        <strong>Perbandingan</strong>
+        <small>Analisis Akhir</small>
+      </div>
+    </button>
+  </nav>
+
+  <!-- ═══ TAB PANES (diisi oleh JavaScript) ═══════════════════════════════════ -->
+  <div id="pane-baseline"   class="pane active"></div>
+  <div id="pane-registry"   class="pane"></div>
+  <div id="pane-rag"        class="pane"></div>
+  <div id="pane-comparison" class="pane"></div>
+
+  <!-- ═══ HELP MODAL ══════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="helpOverlay">
+    <div class="modal">
+      <button class="modal-close" id="helpClose">✕</button>
+      <h2>❓ Petunjuk Penggunaan / How to Use</h2>
+      <ol>
+        <li>
+          <strong>Pilih tab</strong> (Baseline / Tool Registry / Tool RAG / Perbandingan)<br>
+          <em>Select a tab to explore each approach</em>
+        </li>
+        <li>
+          <strong>Pilih query contoh</strong> dari dropdown — query nyata dari dataset eksperimen<br>
+          <em>Select a sample query from the dropdown — real queries from the experiment dataset</em>
+        </li>
+        <li>
+          Klik <strong>▶ Jalankan</strong> untuk animasi otomatis, atau klik <strong>Berikutnya ▶</strong> untuk maju langkah demi langkah<br>
+          <em>Click ▶ Run for auto-play, or ▶ Next to step through manually</em>
+        </li>
+        <li>
+          Perhatikan panel <strong>Katalog Tools</strong> di bawah — kartu yang terang = terlihat LLM; abu-abu = tidak terlihat<br>
+          <em>Watch the Tools Catalog panel — bright cards are visible to LLM; grey = filtered out</em>
+        </li>
+        <li>
+          Tab <strong>Perbandingan</strong> menampilkan analisis lengkap ketiga pendekatan<br>
+          <em>The Comparison tab shows full analysis of all three approaches</em>
+        </li>
+      </ol>
+
+      <h3>Kode Warna Modul / Module Color Codes</h3>
+      <div class="module-legend" id="helpModuleLegend"></div>
+
+      <p>
+        <em>Token = satuan biaya komputasi LLM. Setiap tool definition ≈ 80 token.<br>
+        Token = unit of LLM computation cost. Each tool definition ≈ 80 tokens.</em>
+      </p>
+    </div>
+  </div>
+
+  <script src="simulation.js"></script>
+</body>
+</html>

@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagram Arsitektur — Tool Registry vs RAG vs Baseline</title>
+  <link rel="stylesheet" href="diagram.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════════════════════════════════════ -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="header-title">
+      <h1>Diagram Arsitektur & Alur Kerja: Tiga Strategi Tool Management AI Agent</h1>
+      <p class="header-sub">
+        Tugas Akhir · Universitas Siber Asia · Muhammad Ridwan (220101010009) ·
+        zerlo.id AI-ERP Platform
+      </p>
+    </div>
+    <a href="index.html" class="btn-back">← Simulasi Interaktif</a>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     TABS
+═══════════════════════════════════════════════════════════════════════════ -->
+<nav class="tabs">
+  <button class="tab active" data-tab="baseline">
+    <span class="tab-icon">⚠️</span>
+    <div><div class="tab-name">Baseline</div><div class="tab-sub">Semua Tools</div></div>
+  </button>
+  <button class="tab" data-tab="registry">
+    <span class="tab-icon">🗂️</span>
+    <div><div class="tab-name">Tool Registry</div><div class="tab-sub">Filter Metadata</div></div>
+  </button>
+  <button class="tab" data-tab="rag">
+    <span class="tab-icon">🔍</span>
+    <div><div class="tab-name">Tool RAG</div><div class="tab-sub">Pencarian Semantik</div></div>
+  </button>
+  <button class="tab" data-tab="comparison">
+    <span class="tab-icon">📐</span>
+    <div><div class="tab-name">Perbandingan</div><div class="tab-sub">Decision Matrix</div></div>
+  </button>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     TAB 1 — BASELINE
+═══════════════════════════════════════════════════════════════════════════ -->
+<section id="pane-baseline" class="pane active">
+  <div class="approach-container">
+
+    <!-- ── DIAGRAM ─────────────────────────────────────────────────────────── -->
+    <div class="approach-diagram">
+      <div class="approach-title">
+        <h2>⚠️ Pendekatan Baseline</h2>
+        <span class="approach-badge badge-bad">Tanpa Filter — Semua Tools Dimuat</span>
+      </div>
+
+      <!-- Controls -->
+      <div class="diagram-controls">
+        <button class="btn-animate active" id="b-play" onclick="baselinePlay()">▶ Play Otomatis</button>
+        <button class="btn-animate" onclick="baselinePrev()">◀ Sebelumnya</button>
+        <button class="btn-animate" onclick="baselineNext()">Berikutnya ▶</button>
+        <button class="btn-animate" onclick="baselineReset()">↺ Reset</button>
+      </div>
+      <div style="text-align:center;font-size:11px;color:#64748B;margin-bottom:10px">
+        <span id="b-step-counter">Langkah 1 / 5</span> —
+        <span id="b-step-desc">Query diterima oleh AI Agent</span>
+      </div>
+
+      <div class="flow-diagram">
+        <div class="flow-diagram-title">Alur Kerja Baseline (O(N) terhadap jumlah tools)</div>
+
+        <!-- User -->
+        <div class="flow-node node-user" id="node-b-user">
+          <div class="node-icon">👤</div>
+          <div class="node-title">Pengguna / User</div>
+          <div class="node-sub">"Cek stok bahan baku tepung"</div>
+        </div>
+
+        <div class="flow-arrow">
+          <div class="arrow-line short" id="arr-b-1"></div>
+          <div class="arrow-label">query</div>
+          <div class="arrow-head"></div>
+        </div>
+
+        <!-- AI Agent -->
+        <div class="flow-node node-agent" id="node-b-agent">
+          <div class="node-icon">🤖</div>
+          <div class="node-title">AI Agent</div>
+          <div class="node-sub">Pydantic AI · zerlo.id</div>
+        </div>
+
+        <div class="flow-arrow">
+          <div class="arrow-line" id="arr-b-2"></div>
+          <div class="arrow-label">muat semua tools</div>
+          <div class="arrow-head"></div>
+        </div>
+
+        <!-- Catalog -->
+        <div class="flow-node node-catalog" id="node-b-catalog">
+          <div class="node-icon">📦</div>
+          <div class="node-title">Tool Catalog — SEMUA 30 Tools</div>
+          <div class="node-sub">Tidak ada seleksi · Semua modul dimuat</div>
+          <div class="mini-tools" id="b-mini-tools" style="margin:8px auto 0;max-width:300px"></div>
+          <div class="node-badge nb-red" style="margin-top:6px">30 tools × ~80 token = ~2.400 token</div>
+        </div>
+
+        <div class="flow-arrow">
+          <div class="arrow-line tall" id="arr-b-3"></div>
+          <div class="arrow-label">30 tool definitions</div>
+          <div class="arrow-head"></div>
+        </div>
+
+        <!-- Context Window -->
+        <div class="flow-node node-context warn" id="node-b-context">
+          <div class="node-icon">📋</div>
+          <div class="node-title">Context Window LLM</div>
+          <div class="node-sub">Token: <strong id="b-token-count">—</strong></div>
+          <div class="node-badge nb-red" style="margin-top:4px">⚠️ S3: 300 tools = 23.893 token</div>
+        </div>
+
+        <div class="flow-arrow">
+          <div class="arrow-line" id="arr-b-4"></div>
+          <div class="arrow-label">konteks penuh</div>
+          <div class="arrow-head"></div>
+        </div>
+
+        <!-- LLM -->
+        <div class="flow-node node-llm" id="node-b-llm">
+          <div class="node-icon">🧠</div>
+          <div class="node-title">Gemini 2.5 Flash Lite</div>
+          <div class="node-sub">Akurasi S1: <strong>68.8%</strong> — 31.2% permintaan salah</div>
+          <div class="node-badge nb-amber">Context Rot makin parah saat N bertambah</div>
+        </div>
+
+        <div class="flow-arrow">
+          <div class="arrow-line short" id="arr-b-5"></div>
+          <div class="arrow-head"></div>
+        </div>
+
+        <!-- Response -->
+        <div class="flow-node node-response" id="node-b-response">
+          <div class="node-icon">💬</div>
+          <div class="node-title">Respons ke Pengguna</div>
+          <div class="node-badge nb-red">Token tumbuh linier: O(N)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DETAIL PANEL ────────────────────────────────────────────────────── -->
+    <div class="approach-detail">
+
+      <div class="detail-section">
+        <h3>📌 Cara Kerja Baseline</h3>
+        <p>Pada pendekatan baseline, AI Agent meneruskan <strong>seluruh katalog tools</strong> ke dalam <em>context window</em> LLM tanpa seleksi apapun. LLM harus membaca dan mempertimbangkan semua tool definition sebelum dapat memilih satu tool yang sesuai dengan permintaan pengguna.</p>
+        <p>Tidak ada komponen penyaringan antara katalog tools dan LLM — setiap tool definition dikirim sebagai bagian dari prompt, lengkap dengan nama, deskripsi, dan skema parameter.</p>
+      </div>
+
+      <div class="detail-section">
+        <h3>📊 Metrik Eksperimen</h3>
+        <div class="metric-chips">
+          <div class="metric-chip mc-bad">S1 (30 tools): 2.426 token</div>
+          <div class="metric-chip mc-bad">S2 (100 tools): 7.985 token</div>
+          <div class="metric-chip mc-bad">S3 (300 tools): 23.893 token</div>
+        </div>
+        <div class="metric-chips" style="margin-top:6px">
+          <div class="metric-chip mc-amber">Akurasi S1: 68.8%</div>
+          <div class="metric-chip mc-amber">Akurasi S2: 71.4%</div>
+          <div class="metric-chip mc-amber">Akurasi S3: 71.4%</div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>🔢 Masalah Utama: Pertumbuhan O(N)</h3>
+        <div class="steps-list">
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-title">Token bertumbuh linier</div>
+              <div class="step-desc">Setiap tool baru yang ditambahkan ke katalog langsung menambah ~80 token per panggilan LLM. Dari 30→100→300 tools, token naik dari 2.426→7.985→23.893.</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-title">Context Rot</div>
+              <div class="step-desc">LLM yang menerima konteks sangat panjang mengalami degradasi performa — informasi relevan yang berada di tengah konteks sering diabaikan (Liu et al., 2024 — "Lost in the Middle").</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <div class="step-title">Biaya tidak terkendali</div>
+              <div class="step-desc">Biaya inferensi (API cost) tumbuh proporsional dengan jumlah tools. Untuk zerlo.id yang akan berkembang ke 1.000+ tools, baseline tidak layak secara ekonomis.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>🏗️ Komponen yang Dibutuhkan</h3>
+        <div class="infra-list">
+          <div class="infra-item none">✅ AI Agent (Pydantic AI) — sudah ada</div>
+          <div class="infra-item none">✅ LLM API (Gemini) — sudah ada</div>
+          <div class="infra-item none">✅ Tool Catalog — sudah ada</div>
+        </div>
+        <p style="margin-top:8px;font-size:12px">Baseline tidak membutuhkan komponen tambahan, tetapi juga tidak memberikan solusi atas masalah skalabilitas.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     TAB 2 — TOOL REGISTRY
+═══════════════════════════════════════════════════════════════════════════ -->
+<section id="pane-registry" class="pane">
+  <div class="approach-container">
+
+    <!-- ── DIAGRAM ─────────────────────────────────────────────────────────── -->
+    <div class="approach-diagram">
+      <div class="approach-title">
+        <h2>🗂️ Tool Registry</h2>
+        <span class="approach-badge badge-good">Filter Deterministik Berbasis Metadata</span>
+      </div>
+
+      <div class="diagram-controls">
+        <button class="btn-animate active" id="r-play" onclick="registryPlay()">▶ Play Otomatis</button>
+        <button class="btn-animate" onclick="registryPrev()">◀ Sebelumnya</button>
+        <button class="btn-animate" onclick="registryNext()">Berikutnya ▶</button>
+        <button class="btn-animate" onclick="registryReset()">↺ Reset</button>
+      </div>
+      <div style="text-align:center;font-size:11px;color:#64748B;margin-bottom:10px">
+        <span id="r-step-counter">Langkah 1 / 8</span> —
+        <span id="r-step-desc">Query diterima oleh Tool Registry</span>
+      </div>
+
+      <div class="flow-diagram">
+        <div class="flow-diagram-title">Alur Kerja Tool Registry (O(1) terhadap jumlah tools)</div>
+
+        <!-- User -->
+        <div class="flow-node node-user" id="node-r-user">
+          <div class="node-icon">👤</div>
+          <div class="node-title">Pengguna</div>
+          <div class="node-sub">"Cek stok bahan baku tepung"</div>
+        </div>
+
+        <div class="flow-arrow">
+          <div class="arrow-line short" id="arr-r-1"></div>
+          <div class="arrow-label">query</div>
+          <div class="arrow-head"></div>
+        </div>
+
+        <!-- Tool Registry — the main differentiator -->
+        <div class="flow-node node-registry" id="node-r-registry" style="border-width:2px">
+          <div class="node-icon">🗂️</div>
+          <div class="node-title">Tool Registry</div>
+          <div class="node-sub">Filter deterministik · 4 tahap · &lt;1ms</div>
+
+          <div class="filter-pipeline" style="margin-top:8px">
+            <div class="filter-step" id="fs-1">
+              <span class="fs-icon">🔑</span>
+              <span>Ekstrak Kata Kunci</span>
+              <span class="fs-result">stok, bahan baku, tepung</span>
+            </div>
+            <div class="filter-step" id="fs-2">
+              <span class="fs-icon">🗂️</span>
+              <span>Cocokkan Modul</span>
+              <span class="fs-result">→ inventory</span>
+            </div>
+            <div class="filter-step" id="fs-3">
+              <span class="fs-icon">👤</span>
+              <span>Filter Role &amp; Tier</span>
+              <span class="fs-result">manager + premium</span>
+            </div>
+            <div class="filter-step" id="fs-4">
+              <span class="fs-icon">💰</span>
+              <span>Budget Cap ≤ 15</span>
+              <span class="fs-result">5 tools lolos</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Catalog — side reference, not in main flow -->
+        <div style="display:flex;align-items:center;gap:8px;margin:4px 0">
+          <div style="flex:1;height:1px;background:#E2E8F0"></div>
+          <div class="flow-node node-catalog" id="node-r-catalog" style="flex:0 0 130px;padding:6px 8px;font-size:10px">
+            <div style="font-size:14px">📦</div>
+            <div style="font-weight:700">Tool Catalog</div>
+            <div style="color:#64748B">30+ tools terdaftar</div>
+            <div class="mini-tools" id="r-mini-tools" style="margin-top:4px;justify-content:center"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div class="arrow-line short" id="arr-r-catalog" style="transform:rotate(90deg);margin:0"></div>
+          </div>
+        </div>
+
+        <div class="flow-arrow">
+          <div class="arrow-line" id="arr-r-2"></div>
+          <div class="arrow-label">≤15 tools relevan saja</div>
+          <div class="arrow-head"></div>
+        </div>
+
+        <!-- Context Window -->
+        <div class="flow-node node-context good" id="node-r-context">
+          <div class="node-icon">📋</div>
+          <div class="node-title">Context Window LLM</div>
+          <div class="node-sub">Token: <strong id="r-token-count">—</strong></div>
+          <div class="node-badge nb-green">✅ Selalu ≤15 tools · O(1)</div>
+        </div>
+
+        <div class="flow-arrow">
+          <div class="arrow-line" id="arr-r-3"></div>
+          <div class="arrow-head"></div>
+        </div>
+
+        <!-- LLM -->
+        <div class="flow-node node-llm" id="node-r-llm">
+          <div class="node-icon">🧠</div>
+          <div class="node-title">Gemini 2.5 Flash Lite</div>
+          <div class="node-sub">Akurasi S1: <strong>75.0%</strong> (+6.3pp vs baseline)</div>
+          <div class="node-badge nb-green">Konteks bersih → akurasi lebih tinggi</div>
+        </div>
+
+        <div class="flow-arrow">
+          <div class="arrow-line short" id="arr-r-4"></div>
+          <div class="arrow-head"></div>
+        </div>
+
+        <!-- Response -->
+        <div class="flow-node node-response" id="node-r-response">
+          <div class="node-icon">💬</div>
+          <div class="node-title">Respons ke Pengguna</div>
+          <div class="node-badge nb-green">Token tetap konstan: O(1)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DETAIL PANEL ────────────────────────────────────────────────────── -->
+    <div class="approach-detail">
+
+      <div class="detail-section">
+        <h3>📌 Cara Kerja Tool Registry</h3>
+        <p>Tool Registry adalah lapisan penyaring (<em>filtering layer</em>) yang berdiri <strong>di antara AI Agent dan LLM</strong>. Setiap tool dalam katalog didaftarkan dengan metadata terstruktur (<code>ToolMeta</code>). Ketika query masuk, registry memfilter katalog menggunakan 4 tahap sebelum meneruskan subset tools ke LLM.</p>
+        <p>Karena filtering bersifat deterministik dan berbasis in-memory Python dict, overhead latensi sangat kecil (&lt;1ms) — tidak ada model ML atau database eksternal yang dibutuhkan.</p>
+      </div>
+
+      <div class="detail-section">
+        <h3>🏗️ Skema ToolMeta</h3>
+        <div class="code-block">
+<span class="kw">@dataclass</span>
+<span class="kw">class</span> ToolMeta:
+    tool_id:  <span class="kw">str</span>         <span class="cm"># "inventory_check_stock"</span>
+    module:   <span class="kw">str</span>         <span class="cm"># "inventory"</span>
+    op_type:  <span class="kw">str</span>         <span class="cm"># "read" | "write" | "admin"</span>
+    keywords: list[<span class="kw">str</span>]   <span class="cm"># ["stok", "cek", "bahan baku"]</span>
+    role:     <span class="kw">str</span>         <span class="cm"># "manager" | "cashier" | "admin"</span>
+    tier:     <span class="kw">str</span>         <span class="cm"># "free" | "pro" | "premium"</span>
+    tokens:   <span class="kw">int</span>         <span class="cm"># estimasi token definition ~80</span>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>🔄 4 Tahap Filter Pipeline</h3>
+        <div class="steps-list">
+          <div class="step-item">
+            <div class="step-num green">1</div>
+            <div class="step-content">
+              <div class="step-title">🔑 Ekstraksi Kata Kunci</div>
+              <div class="step-desc">Registry mengekstrak token-token penting dari query pengguna (tokenisasi sederhana + stopword removal). Hasil: daftar kata kunci yang akan dicocokkan.</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num green">2</div>
+            <div class="step-content">
+              <div class="step-title">🗂️ Pencocokan Modul</div>
+              <div class="step-desc">Kata kunci dicocokkan dengan field <code>module</code> dan <code>keywords[]</code> setiap tool. Tool dari modul yang tidak relevan langsung dieliminasi.</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num green">3</div>
+            <div class="step-content">
+              <div class="step-title">👤 Filter Role &amp; Tier</div>
+              <div class="step-desc">Tool yang membutuhkan role atau tier lebih tinggi dari pengguna saat ini disembunyikan. Contoh: kasir tidak melihat tools administrasi sistem.</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num green">4</div>
+            <div class="step-content">
+              <div class="step-title">💰 Budget Cap</div>
+              <div class="step-desc">Tools diurutkan berdasarkan skor relevansi keyword. Maksimal 15 tools teratas yang diteruskan ke LLM — memastikan context window tetap kecil dan konstan.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>📊 Metrik Eksperimen (Gemini Native v2, n=558)</h3>
+        <div class="metric-chips">
+          <div class="metric-chip mc-good">S1: 893 token (−63%)</div>
+          <div class="metric-chip mc-good">S2: 1.241 token (−84%)</div>
+          <div class="metric-chip mc-good">S3: 1.239 token (−95%)</div>
+        </div>
+        <div class="metric-chips" style="margin-top:6px">
+          <div class="metric-chip mc-blue">Wilcoxon p &lt; 0.0001</div>
+          <div class="metric-chip mc-blue">Cohen's d ≥ 11</div>
+          <div class="metric-chip mc-good">Akurasi S1: 75.0% (+6.3pp)</div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>🏗️ Infrastruktur yang Dibutuhkan</h3>
+        <div class="infra-list">
+          <div class="infra-item none">✅ ToolMeta dataclass — deklarasi sederhana</div>
+          <div class="infra-item none">✅ ToolRegistry singleton — in-memory dict</div>
+          <div class="infra-item none">✅ registry_filter() — pure Python, &lt;1ms</div>
+          <div class="infra-item none">✅ Tidak perlu vector DB</div>
+          <div class="infra-item none">✅ Tidak perlu embedding model</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     TAB 3 — TOOL RAG
+═══════════════════════════════════════════════════════════════════════════ -->
+<section id="pane-rag" class="pane">
+  <div class="approach-container">
+
+    <!-- ── DIAGRAM ─────────────────────────────────────────────────────────── -->
+    <div class="approach-diagram">
+      <div class="approach-title">
+        <h2>🔍 Tool RAG</h2>
+        <span class="approach-badge badge-mid">Pencarian Semantik Berbasis Embedding</span>
+      </div>
+
+      <div class="diagram-controls">
+        <button class="btn-animate active" id="rag-play" onclick="ragPlay()">▶ Play Otomatis</button>
+        <button class="btn-animate" onclick="ragPrev()">◀ Sebelumnya</button>
+        <button class="btn-animate" onclick="ragNext()">Berikutnya ▶</button>
+        <button class="btn-animate" onclick="ragReset()">↺ Reset</button>
+      </div>
+      <div style="text-align:center;font-size:11px;color:#64748B;margin-bottom:10px">
+        <span id="rag-step-counter">Langkah 1 / 7</span> —
+        <span id="rag-step-desc">Query diterima</span>
+      </div>
+
+      <div class="flow-diagram">
+        <div class="flow-diagram-title">Alur Kerja Tool RAG (Offline Index + Online Search)</div>
+
+        <!-- Offline section -->
+        <div class="offline-section">
+          <span class="offline-badge">Offline — satu kali setup</span>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+            <div class="flow-node node-catalog" style="flex:1;padding:8px">
+              <div style="font-size:14px">📦</div>
+              <div style="font-size:11px;font-weight:700">Tool Catalog</div>
+              <div style="font-size:9px;color:#64748B">30+ tools</div>
+            </div>
+            <div style="font-size:16px;color:#94A3B8">→</div>
+            <div class="flow-node node-embed" style="flex:1;padding:8px">
+              <div style="font-size:14px">🔢</div>
+              <div style="font-size:11px;font-weight:700">Embedding Model</div>
+              <div style="font-size:9px;color:#64748B">text-embedding-004</div>
+            </div>
+            <div style="font-size:16px;color:#94A3B8">→</div>
+            <div class="flow-node node-vectordb" style="flex:1;padding:8px">
+              <div style="font-size:14px">🗄️</div>
+              <div style="font-size:11px;font-weight:700">Vector DB</div>
+              <div style="font-size:9px;color:#64748B">Pinecone / Chroma</div>
+              <div class="vector-rows">[0.82,−0.31,0.45...]<br>[0.41, 0.77,−0.22...]<br>[0.66,−0.48, 0.33...]</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Online section -->
+        <div class="offline-section" style="margin-top:8px">
+          <span class="online-badge">Online — setiap query</span>
+
+          <!-- User -->
+          <div class="flow-node node-user" id="node-rag-user" style="margin-top:4px">
+            <div class="node-icon">👤</div>
+            <div class="node-title">Pengguna</div>
+            <div class="node-sub">"Cek stok bahan baku tepung"</div>
+          </div>
+
+          <div class="flow-arrow">
+            <div class="arrow-line short" id="arr-rag-1"></div>
+            <div class="arrow-label">query teks</div>
+            <div class="arrow-head"></div>
+          </div>
+
+          <!-- Embedding online -->
+          <div class="flow-node node-embed" id="node-rag-embed">
+            <div class="node-icon">🔢</div>
+            <div class="node-title">Embedding Model (Online)</div>
+            <div class="node-sub">Query → vektor dimensi tinggi</div>
+            <div id="rag-vector-display" style="display:none" class="vector-rows">
+              query → [0.79, −0.28, 0.51, 0.14, −0.63, 0.22, 0.09, ...]
+            </div>
+          </div>
+
+          <div class="flow-arrow">
+            <div class="arrow-line" id="arr-rag-2"></div>
+            <div class="arrow-label">query vector</div>
+            <div class="arrow-head"></div>
+          </div>
+
+          <!-- Vector DB search -->
+          <div class="flow-node node-vectordb" id="node-rag-vecdb">
+            <div class="node-icon">🔍</div>
+            <div class="node-title">Vector DB — Similarity Search</div>
+            <div class="node-sub">Cosine similarity · Top-k retrieval</div>
+            <div class="sim-bars" id="rag-sim-scores" style="display:none"></div>
+          </div>
+
+          <div class="flow-arrow">
+            <div class="arrow-line" id="arr-rag-3"></div>
+            <div class="arrow-label">top-k tools</div>
+            <div class="arrow-head"></div>
+          </div>
+
+          <!-- Context -->
+          <div class="flow-node node-context" id="node-rag-context">
+            <div class="node-icon">📋</div>
+            <div class="node-title">Context Window LLM</div>
+            <div class="node-sub">Token: <strong id="rag-token-count">—</strong></div>
+            <div class="mini-tools" id="rag-mini-tools" style="margin:6px auto 2px"></div>
+            <div class="node-badge nb-purple">Top-k tools relevan secara semantik</div>
+          </div>
+
+          <div class="flow-arrow">
+            <div class="arrow-line short" id="arr-rag-4"></div>
+            <div class="arrow-head"></div>
+          </div>
+
+          <!-- LLM -->
+          <div class="flow-node node-llm" id="node-rag-llm">
+            <div class="node-icon">🧠</div>
+            <div class="node-title">Gemini 2.5 Flash Lite</div>
+            <div class="node-sub">Memilih dari k candidates</div>
+            <div class="node-badge nb-amber">Akurasi bergantung kualitas embedding</div>
+          </div>
+
+          <div class="flow-arrow">
+            <div class="arrow-line short" id="arr-rag-5"></div>
+            <div class="arrow-head"></div>
+          </div>
+
+          <!-- Response -->
+          <div class="flow-node node-response" id="node-rag-response">
+            <div class="node-icon">💬</div>
+            <div class="node-title">Respons ke Pengguna</div>
+            <div class="node-badge nb-purple">Efisien untuk katalog besar tak terstruktur</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DETAIL PANEL ────────────────────────────────────────────────────── -->
+    <div class="approach-detail">
+
+      <div class="detail-section">
+        <h3>📌 Cara Kerja Tool RAG</h3>
+        <p>Tool RAG (<em>Retrieval-Augmented Generation</em> untuk tools) menggunakan <strong>representasi semantik berbasis embedding vector</strong> untuk menemukan tools yang paling relevan dengan query. Berbeda dengan registry yang mengandalkan metadata eksplisit, RAG memahami makna semantik — "bahan makanan" dapat terhubung ke "inventory" meskipun kata tersebut tidak ada dalam metadata tool.</p>
+        <p>Sistem bekerja dalam dua fase: <strong>offline</strong> (indexing semua tool descriptions ke vector DB) dan <strong>online</strong> (embedding query + nearest neighbor search per panggilan).</p>
+      </div>
+
+      <div class="detail-section">
+        <h3>🔄 Alur Kerja Detail</h3>
+        <div class="steps-list">
+          <div class="step-item">
+            <div class="step-num purple">1</div>
+            <div class="step-content">
+              <div class="step-title">Offline: Indexing Tool Catalog</div>
+              <div class="step-desc">Setiap tool description diubah menjadi embedding vector menggunakan model seperti <code>text-embedding-004</code>. Vektor disimpan di Vector DB (Pinecone, Chroma, Qdrant, dll).</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num purple">2</div>
+            <div class="step-content">
+              <div class="step-title">Online: Embed Query</div>
+              <div class="step-desc">Query pengguna diubah menjadi embedding vector menggunakan model yang sama. Ini menambah latensi 50–200ms per panggilan dibanding registry.</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num purple">3</div>
+            <div class="step-content">
+              <div class="step-title">Cosine Similarity Search</div>
+              <div class="step-desc">Vector DB mencari tools dengan vektor terdekat (cosine similarity terbesar) ke vektor query. Hasilnya adalah top-k tools paling "semantically similar".</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num purple">4</div>
+            <div class="step-content">
+              <div class="step-title">Top-k ke LLM</div>
+              <div class="step-desc">Hanya k tools (biasanya 10–20) yang diteruskan ke LLM. Token yang digunakan mirip dengan registry (~950 token untuk S1).</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>⚖️ Kelebihan vs Kekurangan</h3>
+        <div class="steps-list">
+          <div class="step-item" style="background:#ECFDF5;border-color:#A7F3D0">
+            <div class="step-num green">✓</div>
+            <div class="step-content">
+              <div class="step-title" style="color:#065F46">Memahami Makna Semantik</div>
+              <div class="step-desc">Dapat menghubungkan "pesan bahan" dengan "purchase order" meskipun kata kunci tidak exact match — cocok untuk query bahasa alami yang beragam.</div>
+            </div>
+          </div>
+          <div class="step-item" style="background:#ECFDF5;border-color:#A7F3D0">
+            <div class="step-num green">✓</div>
+            <div class="step-content">
+              <div class="step-title" style="color:#065F46">Skalabel untuk Ribuan Tools</div>
+              <div class="step-desc">Approximate nearest neighbor search berjalan O(log N) atau bahkan O(1) dengan HNSW index — efisien untuk katalog sangat besar tanpa struktur modul.</div>
+            </div>
+          </div>
+          <div class="step-item" style="background:#FEF2F2;border-color:#FECACA">
+            <div class="step-num" style="background:#EF4444">✗</div>
+            <div class="step-content">
+              <div class="step-title" style="color:#DC2626">Infrastruktur Kompleks</div>
+              <div class="step-desc">Membutuhkan: embedding model (hosted atau local), vector database, pipeline sinkronisasi saat katalog berubah. Overhead operasional signifikan.</div>
+            </div>
+          </div>
+          <div class="step-item" style="background:#FEF2F2;border-color:#FECACA">
+            <div class="step-num" style="background:#EF4444">✗</div>
+            <div class="step-content">
+              <div class="step-title" style="color:#DC2626">Latensi Tambahan</div>
+              <div class="step-desc">Setiap query membutuhkan embedding computation (50–200ms) + vector search. Dibandingkan registry &lt;1ms, RAG menambah latensi yang terasa pada sistem real-time.</div>
+            </div>
+          </div>
+          <div class="step-item" style="background:#FEF2F2;border-color:#FECACA">
+            <div class="step-num" style="background:#EF4444">✗</div>
+            <div class="step-content">
+              <div class="step-title" style="color:#DC2626">Gagal untuk Tools Semantically Similar</div>
+              <div class="step-desc">Untuk query "Buat purchase order ke supplier tepung", RAG mengembalikan <em>supplier_list_vendors</em> (skor 0.76) hampir sama dengan <em>supplier_create_po</em> (0.88) — LLM bingung karena semantik mirip.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>🏗️ Infrastruktur yang Dibutuhkan</h3>
+        <div class="infra-list">
+          <div class="infra-item required">⚠️ Vector Database (Pinecone / Chroma / Qdrant)</div>
+          <div class="infra-item required">⚠️ Embedding Model (hosted API atau local)</div>
+          <div class="infra-item required">⚠️ Sync pipeline — re-embed saat catalog berubah</div>
+          <div class="infra-item optional">⚡ Latensi +50–200ms per query</div>
+          <div class="infra-item none">✅ Cocok: zerlo.id masa depan (1.000+ tools)</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     TAB 4 — PERBANDINGAN
+═══════════════════════════════════════════════════════════════════════════ -->
+<section id="pane-comparison" class="pane">
+  <div class="cmp-page">
+    <h2>📐 Perbandingan Arsitektur: Tiga Pendekatan Tool Management</h2>
+    <p>Analisis komprehensif berdasarkan hasil eksperimen Gemini Native v2 (n=558) dan pertimbangan arsitektur zerlo.id</p>
+
+    <!-- Three-column mini flow -->
+    <div class="arch-cols">
+
+      <!-- Baseline column -->
+      <div class="arch-col">
+        <div class="arch-col-header bad">⚠️ Baseline</div>
+        <div class="arch-col-body">
+          <div class="arch-flow-compact">
+            <div class="afc-node user">👤 Pengguna</div>
+            <div class="afc-arrow">
+              <div class="afc-arrow-line" style="background:#CBD5E1"></div>
+              <div class="afc-arrow-label">query</div>
+              <div class="afc-arrow-head" style="border-top-color:#CBD5E1"></div>
+            </div>
+            <div class="afc-node context warn" style="border-color:#FECACA">
+              📋 Context Window<br>
+              <small>ALL 30–300 tools</small><br>
+              <span style="color:#DC2626;font-size:10px;font-weight:800">2.426–23.893 token</span>
+            </div>
+            <div class="afc-arrow">
+              <div class="afc-arrow-line" style="background:#CBD5E1"></div>
+              <div class="afc-arrow-head" style="border-top-color:#CBD5E1"></div>
+            </div>
+            <div class="afc-node llm">🧠 LLM</div>
+            <div class="afc-arrow">
+              <div class="afc-arrow-line" style="background:#CBD5E1"></div>
+              <div class="afc-arrow-head" style="border-top-color:#CBD5E1"></div>
+            </div>
+            <div class="afc-node resp">💬 Respons</div>
+          </div>
+          <div style="margin-top:12px;font-size:11px">
+            <div style="background:#FEE2E2;border-radius:6px;padding:8px;line-height:1.6">
+              <strong>Tools terlihat LLM:</strong> SEMUA (O(N))<br>
+              <strong>Infrastruktur baru:</strong> Tidak ada<br>
+              <strong>Token cost:</strong> Tumbuh linier<br>
+              <strong>Cocok untuk:</strong> Prototype kecil
+            </div>
+          </div>
+          <div class="mini-tools" id="cmp-b-tools" style="margin-top:10px;justify-content:center"></div>
+          <div style="text-align:center;font-size:9px;color:#64748B;margin-top:3px">Semua tools terlihat</div>
+        </div>
+      </div>
+
+      <!-- Registry column -->
+      <div class="arch-col">
+        <div class="arch-col-header good">✅ Tool Registry</div>
+        <div class="arch-col-body">
+          <div class="arch-flow-compact">
+            <div class="afc-node user">👤 Pengguna</div>
+            <div class="afc-arrow">
+              <div class="afc-arrow-line" style="background:#10B981"></div>
+              <div class="afc-arrow-label" style="color:#10B981">query</div>
+              <div class="afc-arrow-head" style="border-top-color:#10B981"></div>
+            </div>
+            <div class="afc-node filter">
+              🗂️ Tool Registry<br>
+              <small>Keyword → Module → Role → Budget</small>
+            </div>
+            <div class="afc-arrow">
+              <div class="afc-arrow-line" style="background:#10B981"></div>
+              <div class="afc-arrow-label" style="color:#10B981">≤15 tools</div>
+              <div class="afc-arrow-head" style="border-top-color:#10B981"></div>
+            </div>
+            <div class="afc-node context ok" style="border-color:#A7F3D0">
+              📋 Context Window<br>
+              <small>≤15 tools (O(1))</small><br>
+              <span style="color:#059669;font-size:10px;font-weight:800">~893–1.239 token</span>
+            </div>
+            <div class="afc-arrow">
+              <div class="afc-arrow-line" style="background:#10B981"></div>
+              <div class="afc-arrow-head" style="border-top-color:#10B981"></div>
+            </div>
+            <div class="afc-node llm">🧠 LLM</div>
+            <div class="afc-arrow">
+              <div class="afc-arrow-line" style="background:#10B981"></div>
+              <div class="afc-arrow-head" style="border-top-color:#10B981"></div>
+            </div>
+            <div class="afc-node resp">💬 Respons</div>
+          </div>
+          <div style="margin-top:12px;font-size:11px">
+            <div style="background:#D1FAE5;border-radius:6px;padding:8px;line-height:1.6">
+              <strong>Tools terlihat LLM:</strong> ≤15 (O(1))<br>
+              <strong>Infrastruktur baru:</strong> ToolMeta dict<br>
+              <strong>Token cost:</strong> Konstan!<br>
+              <strong>Cocok untuk:</strong> zerlo.id ERP (sekarang)
+            </div>
+          </div>
+          <div class="mini-tools" id="cmp-r-tools" style="margin-top:10px;justify-content:center"></div>
+          <div style="text-align:center;font-size:9px;color:#64748B;margin-top:3px">Hanya modul relevan</div>
+        </div>
+      </div>
+
+      <!-- RAG column -->
+      <div class="arch-col">
+        <div class="arch-col-header mid">🔍 Tool RAG</div>
+        <div class="arch-col-body">
+          <div class="arch-flow-compact">
+            <div class="afc-node user">👤 Pengguna</div>
+            <div class="afc-arrow">
+              <div class="afc-arrow-line" style="background:#8B5CF6"></div>
+              <div class="afc-arrow-label" style="color:#8B5CF6">query</div>
+              <div class="afc-arrow-head" style="border-top-color:#8B5CF6"></div>
+            </div>
+            <div class="afc-node embed">
+              🔢 Embed Model<br>
+              <small>query → vector</small>
+            </div>
+            <div class="afc-arrow">
+              <div class="afc-arrow-line" style="background:#8B5CF6"></div>
+              <div class="afc-arrow-head" style="border-top-color:#8B5CF6"></div>
+            </div>
+            <div class="afc-node vecdb">
+              🗄️ Vector DB<br>
+              <small>Cosine similarity search</small>
+            </div>
+            <div class="afc-arrow">
+              <div class="afc-arrow-line" style="background:#8B5CF6"></div>
+              <div class="afc-arrow-label" style="color:#8B5CF6">top-k</div>
+              <div class="afc-arrow-head" style="border-top-color:#8B5CF6"></div>
+            </div>
+            <div class="afc-node context" style="border-color:#DDD6FE">
+              📋 Context Window<br>
+              <small>top-k tools (O(1))</small><br>
+              <span style="color:#7C3AED;font-size:10px;font-weight:800">~950–1.310 token</span>
+            </div>
+            <div class="afc-arrow">
+              <div class="afc-arrow-line" style="background:#8B5CF6"></div>
+              <div class="afc-arrow-head" style="border-top-color:#8B5CF6"></div>
+            </div>
+            <div class="afc-node llm">🧠 LLM</div>
+            <div class="afc-arrow">
+              <div class="afc-arrow-line" style="background:#8B5CF6"></div>
+              <div class="afc-arrow-head" style="border-top-color:#8B5CF6"></div>
+            </div>
+            <div class="afc-node resp">💬 Respons</div>
+          </div>
+          <div style="margin-top:12px;font-size:11px">
+            <div style="background:#EDE9FE;border-radius:6px;padding:8px;line-height:1.6">
+              <strong>Tools terlihat LLM:</strong> top-k (O(1))<br>
+              <strong>Infrastruktur baru:</strong> Vector DB + Embed<br>
+              <strong>Token cost:</strong> Konstan<br>
+              <strong>Cocok untuk:</strong> zerlo.id 1.000+ tools
+            </div>
+          </div>
+          <div class="mini-tools" id="cmp-rag-tools" style="margin-top:10px;justify-content:center"></div>
+          <div style="text-align:center;font-size:9px;color:#64748B;margin-top:3px">Semantically similar tools</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decision Matrix -->
+    <div class="matrix-section">
+      <h3>📊 Decision Matrix — Perbandingan Lengkap</h3>
+      <div style="overflow-x:auto">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>Kriteria</th>
+              <th class="bad">⚠️ Baseline</th>
+              <th class="good">✅ Tool Registry</th>
+              <th class="mid">🔍 Tool RAG</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Token (S1, 30 tools)</strong></td>
+              <td class="bad">2.426 token</td>
+              <td class="good">893 token <small>(−63%)</small></td>
+              <td class="mid">~950 token</td></tr>
+            <tr><td><strong>Token (S3, 300 tools)</strong></td>
+              <td class="bad">23.893 token</td>
+              <td class="good">1.239 token <small>(−95%)</small></td>
+              <td class="mid">~1.310 token</td></tr>
+            <tr class="row-hl"><td><strong>Token Scalability</strong></td>
+              <td class="bad">O(N) — linier</td>
+              <td class="good">O(1) — konstan</td>
+              <td class="good">O(1) — konstan</td></tr>
+            <tr><td><strong>Akurasi (S1)</strong></td>
+              <td class="bad">68.8%</td>
+              <td class="good">75.0% <small>(+6.3pp)</small></td>
+              <td class="mid">~73% <small>(est.)</small></td></tr>
+            <tr><td><strong>Akurasi (S3)</strong></td>
+              <td class="bad">71.4%</td>
+              <td class="good">77.6% <small>(+6.3pp)</small></td>
+              <td class="mid">~74% <small>(est.)</small></td></tr>
+            <tr class="row-hl"><td><strong>Latensi Tambahan</strong></td>
+              <td class="good">0ms</td>
+              <td class="good">&lt;1ms</td>
+              <td class="bad">50–200ms</td></tr>
+            <tr><td><strong>Vector DB</strong></td>
+              <td class="good"><span class="check">✅</span> Tidak perlu</td>
+              <td class="good"><span class="check">✅</span> Tidak perlu</td>
+              <td class="bad"><span class="cross">⚠️</span> Wajib</td></tr>
+            <tr><td><strong>Embedding Model</strong></td>
+              <td class="good"><span class="check">✅</span> Tidak perlu</td>
+              <td class="good"><span class="check">✅</span> Tidak perlu</td>
+              <td class="bad"><span class="cross">⚠️</span> Wajib</td></tr>
+            <tr><td><strong>Sync Katalog</strong></td>
+              <td>Manual</td>
+              <td class="good">Manual / otomatis</td>
+              <td class="bad">Re-embed wajib</td></tr>
+            <tr class="row-hl"><td><strong>Pemahaman Semantik</strong></td>
+              <td class="bad">Tidak</td>
+              <td class="bad">Terbatas (keyword)</td>
+              <td class="good">Penuh (embedding)</td></tr>
+            <tr><td><strong>Cocok untuk N tools</strong></td>
+              <td class="bad">&lt;20 tools</td>
+              <td class="good">20–1.000 tools</td>
+              <td class="good">1.000+ tools</td></tr>
+            <tr><td><strong>Uji Statistik</strong></td>
+              <td>—</td>
+              <td class="good">p&lt;0.0001, d≥11 <small>(verified)</small></td>
+              <td class="mid">Belum diuji</td></tr>
+            <tr class="row-hl"><td><strong>Rekomendasi zerlo.id</strong></td>
+              <td class="bad">Tidak</td>
+              <td class="good">✅ Sekarang (60+ tools)</td>
+              <td class="mid">Future work (1.000+ tools)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Conclusion -->
+    <div class="conclusion-box">
+      <h3>🏆 Mengapa Tool Registry adalah Pilihan Tepat untuk zerlo.id Saat Ini</h3>
+      <div class="conclusion-points">
+        <div class="cp">
+          <div class="cp-icon">🗂️</div>
+          <div class="cp-text">
+            <strong>Metadata sudah tersedia secara alami.</strong>
+            <span> zerlo.id memiliki 38 modul terstruktur, sistem RBAC (role-based access control), dan tier subscription — semua metadata yang dibutuhkan Tool Registry sudah ada tanpa konfigurasi tambahan.</span>
+          </div>
+        </div>
+        <div class="cp">
+          <div class="cp-icon">⚡</div>
+          <div class="cp-text">
+            <strong>Zero infrastructure overhead.</strong>
+            <span> Tidak butuh vector DB atau embedding model — filter berjalan in-memory Python &lt;1ms. Dapat langsung diintegrasikan ke codebase FastAPI + Pydantic AI yang ada.</span>
+          </div>
+        </div>
+        <div class="cp">
+          <div class="cp-icon">📊</div>
+          <div class="cp-text">
+            <strong>Terbukti secara statistik.</strong>
+            <span> Wilcoxon p&lt;0.0001, Cohen's d≥11 — penghematan 63–95% token bukan kebetulan. Akurasi meningkat +6.3pp di S1 dan S3.</span>
+          </div>
+        </div>
+        <div class="cp">
+          <div class="cp-icon">📈</div>
+          <div class="cp-text">
+            <strong>Skalabilitas O(1) terbukti.</strong>
+            <span> Saat katalog berkembang dari 30→100→300 tools, token Registry tetap ~1.240 — bukan tumbuh linier seperti baseline. zerlo.id dapat scale ke ratusan modul tanpa degradasi performa.</span>
+          </div>
+        </div>
+        <div class="cp">
+          <div class="cp-icon">🔮</div>
+          <div class="cp-text">
+            <strong>Tool RAG sebagai natural next step.</strong>
+            <span> Saat zerlo.id berkembang ke ribuan tools atau menambah modul yang tidak memiliki struktur modul yang jelas, Tool RAG menjadi pilihan yang tepat — dan Tool Registry sudah menyiapkan metadata yang akan berguna sebagai filter tahap pertama dalam two-stage hybrid approach.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two-stage hybrid -->
+    <div class="matrix-section">
+      <h3>🔭 Roadmap: Two-Stage Hybrid (Future Work)</h3>
+      <p style="font-size:13px;color:#64748B;margin-bottom:14px">Kombinasi terbaik Registry + RAG untuk zerlo.id masa depan dengan 1.000+ tools:</p>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div class="afc-node user" style="padding:10px 14px;font-size:12px">👤 Query</div>
+        <div style="font-size:18px;color:#94A3B8">→</div>
+        <div class="afc-node filter" style="padding:10px 14px;font-size:12px">
+          🗂️ Stage 1: Tool Registry<br>
+          <small>Filter modul + RBAC + tier<br>30 tools tersisa dari 1.000</small>
+        </div>
+        <div style="font-size:18px;color:#94A3B8">→</div>
+        <div class="afc-node vecdb" style="padding:10px 14px;font-size:12px">
+          🔍 Stage 2: Tool RAG<br>
+          <small>Semantic search dalam subset<br>10–15 tools terbaik</small>
+        </div>
+        <div style="font-size:18px;color:#94A3B8">→</div>
+        <div class="afc-node llm" style="padding:10px 14px;font-size:12px">🧠 LLM</div>
+        <div style="font-size:18px;color:#94A3B8">→</div>
+        <div class="afc-node resp" style="padding:10px 14px;font-size:12px">💬 Respons</div>
+      </div>
+      <p style="font-size:12px;color:#64748B;margin-top:10px">
+        Stage 1 (Registry) mengeliminasi irrelevant modules secara deterministik — sangat cepat.
+        Stage 2 (RAG) melakukan semantic ranking dalam subset yang sudah kecil — akurat.
+        Kombinasi ini mengatasi kelemahan masing-masing pendekatan.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<script src="diagram.js"></script>
+</body>
+</html>
