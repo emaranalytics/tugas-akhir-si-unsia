@@ -100,6 +100,18 @@ zerlo.id is an AI-powered ERP for Indonesian F&B SMEs with:
 - 60+ active tools in production
 - Beta testing stage
 
+## On-Demand Rule Files
+
+These files contain detailed rules/data for writing thesis chapters. **Do NOT auto-load all of them.**
+Read the specific file only when the task requires it.
+
+| Rule File | Isi | Kapan Dibaca |
+|-----------|-----|--------------|
+| `.claude/rules/sistematika-bab.md` | Struktur & konten wajib tiap bab (Bab I–V), rumusan masalah, tujuan, sub-bab, data apa yang masuk ke mana | Sebelum menulis bab apapun |
+| `.claude/rules/format-penulisan.md` | Format teknis UNSIA: margin, font, spasi, caption, penomoran, bahasa pasif, IEEE citation style, aturan tabel/gambar | Saat formatting naskah atau menyusun daftar pustaka |
+| `.claude/rules/data-hasil-eksperimen.md` | Angka resmi eksperimen (token, accuracy, latency, Wilcoxon p, Cohen's d) — wajib akurat | Setiap kali menulis Bab IV, abstrak, atau kesimpulan angka |
+| `.claude/rules/referensi-sitasi.md` | Tabel sitasi per topik (Tool RAG, Tool Registry, LLM FC, Context Rot) + format IEEE 11 referensi kunci | Saat menulis Bab II atau menambahkan sitasi ke paragraf apapun |
+
 ## Relevant Files to Know
 
 - `README.md` — full project narrative with results
@@ -107,6 +119,8 @@ zerlo.id is an AI-powered ERP for Indonesian F&B SMEs with:
 - `00-ringkasan-project-zerlo.md` — zerlo.id overview
 - `plan/01-dev-plan-evaluasi-tool-registry.md` — dev plan and roadmap
 - `plan/02-bab5-threats-to-validity.md` — Bab 5 threats to validity draft
+- `reference/referensi-ilmiah.md` — 21 academic references with full summaries
+- `reference/PEDOMAN PENULISAN TUGAS AKHIR Validasi.md` — full university writing guidelines
 - `src/experiments/run_eval.py --help` — CLI entry point documentation
 
 ## Coding Style
