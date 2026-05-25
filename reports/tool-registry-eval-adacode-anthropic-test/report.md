@@ -10,22 +10,22 @@ Judul:
 |------|-------|
 | Runner | `src/experiments/run_eval.py` |
 | Backend | `adacode` |
-| Model | `MiniMax-M2.7` |
+| Model | `claude-sonnet-4-6` |
 | Google Gen AI SDK | `available` |
 | API key present | `True` |
 | Tool budget | `15` |
 | Live baseline enabled | `True` |
 | Repeat runs | `1` |
-| ADACODE model key | `minimax` |
-| ADACODE model name | `MiniMax-M2.7` |
-| Run mode | live minimax (MiniMax-M2.7) via ADACODE OpenAI-compatible API |
-| Total records | 4 |
+| ADACODE model key | `anthropic` |
+| ADACODE model name | `claude-sonnet-4-6` |
+| Run mode | live anthropic (claude-sonnet-4-6) via ADACODE OpenAI-compatible API |
+| Total records | 2 |
 
-## Methodology Note (ADACODE Backend — minimax (MiniMax-M2.7))
+## Methodology Note (ADACODE Backend — anthropic (claude-sonnet-4-6))
 
 This report was produced by **real LLM API calls via ADACODE OpenAI-compatible API**.
 
-- Model: `MiniMax-M2.7` (via ADACODE, key: `minimax`)
+- Model: `claude-sonnet-4-6` (via ADACODE, key: `anthropic`)
 - Base URL: `https://api.adacode.ai/v1`
 - Each query was run `1` time(s) to account for stochasticity.
 - Tools are passed as OpenAI-compatible `function` tool declarations with
@@ -36,7 +36,7 @@ This report was produced by **real LLM API calls via ADACODE OpenAI-compatible A
 - Accuracy = fraction of runs where the called function name matches `expected_tool`.
 - Latency = wall-clock time measured with `time.perf_counter()` around the HTTP POST call.
 - Baseline runs capped at `EVAL_BASELINE_MAX_SCENARIO=S1` to manage token budget.
-- ADACODE routes requests to the underlying provider (minimax) automatically.
+- ADACODE routes requests to the underlying provider (anthropic) automatically.
 
 ## Experiment Flow
 
@@ -57,8 +57,8 @@ flowchart LR
 
 | scenario | mode | total_tools | avg_visible_tools | avg_total_tokens | std_total_tokens | accuracy | std_accuracy | latency_p50_ms | latency_p95_ms | latency_mean_ms | std_latency_ms | registry_memory_bytes | runs |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| S1 | baseline | 30 | 30 | 2870.5 | 49.5 | 1.0 | 0.0 | 5379.262 | 6342.526 | 5379.262 | 1070.293 | 0 | 2 |
-| S1 | registry | 30 | 10 | 2047.5 | 872.5 | 1.0 | 0.0 | 2022.303 | 3768.388 | 2022.303 | 1940.094 | 21966 | 2 |
+| S1 | baseline | 30 | 30 | 3000.0 | 0.0 | 0.0 | 0.0 | 3805.896 | 3805.896 | 3805.896 | 0.0 | 0 | 1 |
+| S1 | registry | 30 | 10 | 3000.0 | 0.0 | 0.0 | 0.0 | 920.179 | 920.179 | 920.179 | 0.0 | 21966 | 1 |
 
 ## Visualizations
 
@@ -86,7 +86,7 @@ flowchart LR
 
 | scenario | n_pairs | token_reduction_mean | token_reduction_ci95_lower | token_reduction_ci95_upper | wilcoxon_token_p | cohens_d_tokens | accuracy_improvement_mean | wilcoxon_accuracy_p |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| S1 | 2 |  |  |  |  |  |  |  |
+| S1 | 1 |  |  |  |  |  |  |  |
 
 Interpretasi:
 - **token_reduction_mean**: rata-rata token yang dihemat registry vs baseline per query (token absolut).

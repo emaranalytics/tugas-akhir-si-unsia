@@ -61,6 +61,26 @@ These coefficients are modelling assumptions calibrated to plausible LLM behavio
 real Gemini runs**. Token reduction and sub-linear scalability claims are arithmetic properties of the
 formula and are valid. Accuracy and latency improvement claims must be confirmed with real LLM runs.
 """
+    elif config.backend == "adacode":
+        model_label = f"{config.adacode_model} ({config.adacode_model_name})"
+        return f"""\
+## Methodology Note (ADACODE Backend — {model_label})
+
+This report was produced by **real LLM API calls via ADACODE OpenAI-compatible API**.
+
+- Model: `{config.adacode_model_name}` (via ADACODE, key: `{config.adacode_model}`)
+- Base URL: `https://api.adacode.ai/v1`
+- Each query was run `{config.repeat_runs}` time(s) to account for stochasticity.
+- Tools are passed as OpenAI-compatible `function` tool declarations with
+  `name`, `description`, and empty `parameters` schema.
+- Tool description format: `[op_type] Modul <module>. Kata kunci: kw1, kw2, kw3.`
+- `tool_choice` set to `"auto"` — model chooses which tool to call.
+- Token counts are the actual `usage` field from the API response (prompt_tokens + completion_tokens).
+- Accuracy = fraction of runs where the called function name matches `expected_tool`.
+- Latency = wall-clock time measured with `time.perf_counter()` around the HTTP POST call.
+- Baseline runs capped at `EVAL_BASELINE_MAX_SCENARIO={config.baseline_max_scenario}` to manage token budget.
+- ADACODE routes requests to the underlying provider ({config.adacode_model}) automatically.
+"""
     else:
         return f"""\
 ## Methodology Note (Gemini Native Backend)
@@ -94,8 +114,13 @@ def write_report(
     stat_tests: list[dict] | None = None,
 ) -> None:
     stat_tests = stat_tests or []
-    backend_label = "synthetic deterministic benchmark" if config.backend == "synthetic" else "live Gemini native function calling (Google Gen AI SDK)"
-    headers = _summary_headers_gemini() if config.backend == "gemini" else _summary_headers_synthetic()
+    backend_labels = {
+        "synthetic": "synthetic deterministic benchmark",
+        "gemini": "live Gemini native function calling (Google Gen AI SDK)",
+        "adacode": f"live {config.adacode_model} ({config.adacode_model_name}) via ADACODE OpenAI-compatible API",
+    }
+    backend_label = backend_labels.get(config.backend, config.backend)
+    headers = _summary_headers_gemini() if config.backend in ("gemini", "adacode") else _summary_headers_synthetic()
     method_note = _methodology_note(config)
 
     report = f"""# Tool Registry Evaluation Report
@@ -110,12 +135,14 @@ Judul:
 |------|-------|
 | Runner | `src/experiments/run_eval.py` |
 | Backend | `{config.backend}` |
-| Model | `{config.model}` |
+| Model | `{getattr(config, "adacode_model_name", None) or config.model}` |
 | Google Gen AI SDK | `{"available" if genai is not None else "not available"}` |
 | API key present | `{config.api_key_present}` |
 | Tool budget | `{config.tool_budget}` |
 | Live baseline enabled | `{config.live_baseline}` |
 | Repeat runs | `{config.repeat_runs}` |
+| ADACODE model key | `{config.adacode_model}` |
+| ADACODE model name | `{config.adacode_model_name}` |
 | Run mode | {backend_label} |
 | Total records | {len(rows)} |
 

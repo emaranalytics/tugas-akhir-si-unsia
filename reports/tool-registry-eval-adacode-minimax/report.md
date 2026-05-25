@@ -15,11 +15,11 @@ Judul:
 | API key present | `True` |
 | Tool budget | `15` |
 | Live baseline enabled | `True` |
-| Repeat runs | `1` |
+| Repeat runs | `3` |
 | ADACODE model key | `minimax` |
 | ADACODE model name | `MiniMax-M2.7` |
 | Run mode | live minimax (MiniMax-M2.7) via ADACODE OpenAI-compatible API |
-| Total records | 4 |
+| Total records | 411 |
 
 ## Methodology Note (ADACODE Backend — minimax (MiniMax-M2.7))
 
@@ -27,7 +27,7 @@ This report was produced by **real LLM API calls via ADACODE OpenAI-compatible A
 
 - Model: `MiniMax-M2.7` (via ADACODE, key: `minimax`)
 - Base URL: `https://api.adacode.ai/v1`
-- Each query was run `1` time(s) to account for stochasticity.
+- Each query was run `3` time(s) to account for stochasticity.
 - Tools are passed as OpenAI-compatible `function` tool declarations with
   `name`, `description`, and empty `parameters` schema.
 - Tool description format: `[op_type] Modul <module>. Kata kunci: kw1, kw2, kw3.`
@@ -35,7 +35,7 @@ This report was produced by **real LLM API calls via ADACODE OpenAI-compatible A
 - Token counts are the actual `usage` field from the API response (prompt_tokens + completion_tokens).
 - Accuracy = fraction of runs where the called function name matches `expected_tool`.
 - Latency = wall-clock time measured with `time.perf_counter()` around the HTTP POST call.
-- Baseline runs capped at `EVAL_BASELINE_MAX_SCENARIO=S1` to manage token budget.
+- Baseline runs capped at `EVAL_BASELINE_MAX_SCENARIO=S2` to manage token budget.
 - ADACODE routes requests to the underlying provider (minimax) automatically.
 
 ## Experiment Flow
@@ -57,8 +57,11 @@ flowchart LR
 
 | scenario | mode | total_tools | avg_visible_tools | avg_total_tokens | std_total_tokens | accuracy | std_accuracy | latency_p50_ms | latency_p95_ms | latency_mean_ms | std_latency_ms | registry_memory_bytes | runs |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| S1 | baseline | 30 | 30 | 2870.5 | 49.5 | 1.0 | 0.0 | 5379.262 | 6342.526 | 5379.262 | 1070.293 | 0 | 2 |
-| S1 | registry | 30 | 10 | 2047.5 | 872.5 | 1.0 | 0.0 | 2022.303 | 3768.388 | 2022.303 | 1940.094 | 21966 | 2 |
+| S1 | baseline | 30 | 30 | 2776.75 | 52.507 | 0.0 | 0.0 | 2336.306 | 6874.397 | 2601.523 | 3548.72 | 0 | 48 |
+| S1 | registry | 30 | 10.625 | 2776.729 | 52.175 | 0.0 | 0.0 | 66.668 | 175.598 | 78.46 | 34.696 | 21966 | 48 |
+| S2 | baseline | 100 | 100 | 5342.81 | 2968.291 | 0.0 | 0.0 | 122.939 | 3578.776 | 992.81 | 1878.109 | 0 | 84 |
+| S2 | registry | 100 | 15 | 5341.655 | 2966.953 | 0.0 | 0.0 | 68.701 | 152.234 | 124.415 | 440.692 | 70091 | 84 |
+| S3 | registry | 300 | 15 | 3703.653 | 2941.858 | 0.0136 | 0.1158 | 75.512 | 5893.634 | 1346.544 | 3280.397 | 200130 | 147 |
 
 ## Visualizations
 
@@ -86,7 +89,8 @@ flowchart LR
 
 | scenario | n_pairs | token_reduction_mean | token_reduction_ci95_lower | token_reduction_ci95_upper | wilcoxon_token_p | cohens_d_tokens | accuracy_improvement_mean | wilcoxon_accuracy_p |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| S1 | 2 |  |  |  |  |  |  |  |
+| S1 | 16 | 0.02 | -10.68 | 10.72 | 0.445878 | 0.001 | 0.0 | nan |
+| S2 | 28 | 1.15 | -5.19 | 7.5 | 0.5 | 0.0705 | 0.0 | nan |
 
 Interpretasi:
 - **token_reduction_mean**: rata-rata token yang dihemat registry vs baseline per query (token absolut).

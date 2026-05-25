@@ -1,0 +1,2 @@
+scenario,n_pairs,error
+S1,2,insufficient paired data (need ≥3)

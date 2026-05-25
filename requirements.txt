@@ -1,4 +1,6 @@
 google-genai
+openapi-core
+httpx
 python-dotenv
 pydantic-ai
 pydantic

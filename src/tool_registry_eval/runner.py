@@ -4,16 +4,15 @@ from typing import Any
 
 import json
 
+from .backends import get_backend
 from .catalog import make_queries, make_tools, scenario_queries, scenario_tools, write_input_data
 from .charts import make_charts
 from .config import EvalConfig, load_config
-from .gemini_backend import run_gemini_row
 from .io import write_csv
 from .measure import all_statistical_tests, summarize
 from .paths import ensure_dirs, resolve_output_dir, resolve_report_dir
 from .registry import registry_memory
 from .scenarios import SCENARIOS
-from .synthetic_backend import run_synthetic_row
 
 
 def scenario_names(max_scenario: str) -> list[str]:
@@ -23,14 +22,42 @@ def scenario_names(max_scenario: str) -> list[str]:
     return names[: names.index(max_scenario) + 1]
 
 
+def _load_done_keys(output_dir) -> set[tuple[str, str, str, int]]:
+    """Return (scenario, mode, query_id, repeat_idx) tuples already on disk."""
+    done: set[tuple[str, str, str, int]] = set()
+    if output_dir is None:
+        return done
+    for fname in ("baseline.jsonl", "registry.jsonl"):
+        p = output_dir / fname
+        if not p.exists():
+            continue
+        for line in p.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                r = json.loads(line)
+                done.add((r["scenario"], r["mode"], r["query_id"], int(r["repeat_idx"])))
+            except (json.JSONDecodeError, KeyError):
+                pass
+    return done
+
+
 def run_rows(config: EvalConfig, output_dir=None) -> list[dict[str, Any]]:
     tools = make_tools()
     queries = make_queries()
     write_input_data(tools, queries)
 
-    # Open incremental JSONL sinks so no data is lost on partial runs.
-    baseline_sink = open(output_dir / "baseline.jsonl", "w", encoding="utf-8") if output_dir else None
-    registry_sink = open(output_dir / "registry.jsonl", "w", encoding="utf-8") if output_dir else None
+    backend = get_backend(config)
+
+    # Load already-completed keys so we can resume interrupted runs.
+    done_keys = _load_done_keys(output_dir)
+    if done_keys:
+        print(f"Resuming: {len(done_keys)} rows already on disk — skipping those.", flush=True)
+
+    # Open incremental JSONL sinks in append mode so partial runs are resumable.
+    baseline_sink = open(output_dir / "baseline.jsonl", "a", encoding="utf-8") if output_dir else None
+    registry_sink = open(output_dir / "registry.jsonl", "a", encoding="utf-8") if output_dir else None
 
     def _flush(row: dict) -> None:
         sink = baseline_sink if row["mode"] == "baseline" else registry_sink
@@ -48,38 +75,36 @@ def run_rows(config: EvalConfig, output_dir=None) -> list[dict[str, Any]]:
         baseline_scenarios = scenario_names(config.baseline_max_scenario)
         run_baseline = config.live_baseline and scenario in baseline_scenarios
         modes = []
-        if config.backend != "gemini" or run_baseline:
+        # synthetic always runs baseline; gemini/adacode runs baseline only when live_baseline is enabled
+        if config.backend == "synthetic" or run_baseline:
             modes.append("baseline")
         modes.append("registry")
 
+        n_repeats = config.repeat_runs if config.backend in ("gemini", "adacode") else 1
+
         for mode in modes:
             for query in queries_for_scenario:
-                # repeat_runs applies to non-deterministic (gemini) backend only
-                n_repeats = config.repeat_runs if config.backend == "gemini" else 1
                 for repeat_idx in range(n_repeats):
-                    if config.backend == "gemini":
+                    key = (scenario, mode, query.query_id, repeat_idx)
+                    if key in done_keys:
                         print(
-                            f"  [{scenario}/{mode}] {query.query_id} rep={repeat_idx + 1}/{n_repeats}",
+                            f"  [{scenario}/{mode}] {query.query_id} rep={repeat_idx + 1}/{n_repeats} SKIP",
                             flush=True,
                         )
-                        row = run_gemini_row(
-                            mode=mode,
-                            scenario=scenario,
-                            query=query,
-                            tools_for_scenario=tools_for_scenario,
-                            registry_memory_bytes=memory_bytes,
-                            config=config,
-                            repeat_idx=repeat_idx,
-                        )
-                    else:
-                        row = run_synthetic_row(
-                            mode=mode,
-                            scenario=scenario,
-                            query=query,
-                            tools_for_scenario=tools_for_scenario,
-                            registry_memory_bytes=memory_bytes,
-                            tool_budget=config.tool_budget,
-                        )
+                        continue
+                    print(
+                        f"  [{scenario}/{mode}] {query.query_id} rep={repeat_idx + 1}/{n_repeats}",
+                        flush=True,
+                    )
+                    row = backend.call(
+                        mode=mode,
+                        scenario=scenario,
+                        query=query,
+                        tools_for_scenario=tools_for_scenario,
+                        registry_memory_bytes=memory_bytes,
+                        config=config,
+                        repeat_idx=repeat_idx,
+                    )
                     rows.append(row)
                     _flush(row)
 
@@ -91,6 +116,25 @@ def run_rows(config: EvalConfig, output_dir=None) -> list[dict[str, Any]]:
     return rows
 
 
+def _load_all_rows(output_dir) -> list[dict[str, Any]]:
+    """Read all rows from the JSONL files in output_dir (for post-run reporting)."""
+    rows: list[dict[str, Any]] = []
+    if output_dir is None:
+        return rows
+    for fname in ("baseline.jsonl", "registry.jsonl"):
+        p = output_dir / fname
+        if not p.exists():
+            continue
+        for line in p.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line:
+                try:
+                    rows.append(json.loads(line))
+                except json.JSONDecodeError:
+                    pass
+    return rows
+
+
 def main() -> None:
     config = load_config()
     ensure_dirs(config.output_subdir)
@@ -99,7 +143,10 @@ def main() -> None:
 
     print(f"Backend: {config.backend}  max_scenario: {config.max_scenario}  "
           f"repeat_runs: {config.repeat_runs}  live_baseline: {config.live_baseline}")
-    rows = run_rows(config, output_dir=output_dir)
+    run_rows(config, output_dir=output_dir)
+
+    # Load all rows (new + pre-existing skipped) for summary/report.
+    rows = _load_all_rows(output_dir)
 
     summary = summarize(rows)
     write_csv(output_dir / "summary.csv", summary)
