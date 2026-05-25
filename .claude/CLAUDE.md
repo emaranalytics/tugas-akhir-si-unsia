@@ -22,13 +22,15 @@ Multi-Modul pada Platform ERP Restoran zerlo.id"
 - **CLI**: typer, rich, tqdm
 - **Production system**: FastAPI + MongoDB Atlas + GCP (zerlo.id)
 
-## Key Experiments (All Complete)
+## Key Experiments
 
 | Experiment | Location | Status |
 |-----------|----------|--------|
 | Synthetic S1–S4 (deterministic) | `outputs/summary.csv` | ✅ |
 | Gemini Native v2 (n=558, 100 queries, S1–S3) | `outputs/gemini-native-v2/` | ✅ Official |
 | Gemini Rich Descriptions (n=156) | `outputs/gemini-rich/` | ✅ Future-work |
+| MiniMax-M2.7 (S1–S2 complete, S3 in progress) | `outputs/adacode-minimax/` | 🔄 Multi-model comparison |
+| Claude Sonnet 4.6 (planned, S1–S3, 3 repeats) | `outputs/adacode-anthropic/` | 📋 Multi-model comparison |
 
 ## Codebase Structure
 
@@ -38,9 +40,7 @@ src/
     catalog.py        # ToolDef catalog + 100-query dataset
     registry.py       # ToolRegistry filtering logic
     config.py         # Env var configuration
-    gemini_backend.py # Google Gen AI SDK wrapper with retry backoff
-    synthetic_backend.py # Deterministic simulation backend
-    runner.py         # JSONL incremental run loop
+    runner.py         # JSONL incremental run loop (resume-safe, append mode)
     measure.py        # Statistical tests (Wilcoxon, Cohen's d, 95% CI)
     report.py         # Markdown report generator
     charts.py         # matplotlib charts
@@ -48,6 +48,12 @@ src/
     domain.py         # Domain definitions
     paths.py          # Output path helpers
     scenarios.py      # Scenario definitions + intent templates
+    backends/
+      __init__.py     # get_backend() factory
+      base.py         # LLMBackend ABC + LLMResult
+      gemini.py       # Google Gen AI SDK wrapper with retry backoff
+      synthetic.py    # Deterministic simulation backend
+      adacode.py      # OpenAI-compatible multi-model (Claude, MiniMax, GLM)
   experiments/
     run_eval.py       # Entry point CLI
 ```
@@ -56,7 +62,8 @@ src/
 
 | Variable | Purpose |
 |----------|---------|
-| `EVAL_BACKEND` | `synthetic`, `gemini`, or `gemini-rich` |
+| `EVAL_BACKEND` | `synthetic`, `gemini`, or `adacode` |
+| `EVAL_ADACODE_MODEL` | `anthropic`, `minimax`, or `glm` (for adacode backend) |
 | `EVAL_MAX_SCENARIO` | Max scenario index to run |
 | `EVAL_REPEAT_RUNS` | Number of repeats per scenario |
 | `EVAL_OUTPUT_SUBDIR` | Output subdirectory name |

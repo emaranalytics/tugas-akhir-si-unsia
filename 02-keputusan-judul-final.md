@@ -3,16 +3,18 @@
 > Dokumen ini menetapkan arah judul yang dipilih untuk Tugas Akhir
 > berbasis project **zerlo.id**. Alternatif judul sebelumnya tetap
 > disimpan di folder `arsip-judul/` sebagai bahan historis.
+>
+> **Status: JUDUL DIKUNCI — tidak berubah lagi.** (per 25 Mei 2026)
 
 ---
 
-## 1. Judul yang Dipilih
+## 1. Judul Final (Dikunci)
 
 > **"Implementasi dan Evaluasi Tool Registry untuk Skalabilitas AI Agent
 > Multi-Modul pada Platform ERP Restoran zerlo.id"**
 
-Judul ini menjadi arah utama dan digunakan sebagai basis penyusunan
-proposal, Bab 1, Bab 2, metodologi, dan rancangan eksperimen.
+Judul ini **final** dan menjadi dasar penulisan seluruh bab skripsi —
+Bab 1, Bab 2, Bab 3, Bab 4, dan Bab 5.
 
 ---
 
@@ -100,13 +102,14 @@ Metrik utama yang akan digunakan:
 
 ---
 
-## 6b. Temuan Evaluasi (per 5 Mei 2026)
+## 6b. Temuan Evaluasi (update 25 Mei 2026)
 
-Empat set eksperimen telah dijalankan:
+Lima set eksperimen telah dijalankan / direncanakan:
 (1) benchmark synthetic deterministik S1–S4,
 (2) eksperimen Gemini compact text router S1–S3 (3 repeats, n=210) — **sudah digantikan**,
 (3) eksperimen Gemini native function_declarations S1–S3 (3 repeats, n=156) — **digantikan v2**,
-(4) eksperimen Gemini native v2 — 100 query, S1–S3 full baseline+registry (3 repeats, n=558) — **hasil resmi**.
+(4) eksperimen Gemini native v2 — 100 query, S1–S3 full baseline+registry (3 repeats, n=558) — **hasil resmi**,
+(5) eksperimen multi-model perbandingan via ADACODE — MiniMax-M2.7 (S1–S2 selesai, S3 in progress) dan Claude Sonnet 4.6 (direncanakan, setup sama dengan gemini-native-v2) — **perbandingan tambahan, bukan pengganti hasil resmi**.
 
 ### Hasil Benchmark Synthetic (S1–S4, deterministik)
 
@@ -224,9 +227,9 @@ mengukur kontribusi registry secara murni — variabel deskripsi sudah dikontrol
 | `03-pertanyaan-untuk-dospem.md` | Pertanyaan bimbingan terkait judul final |
 | `plan/01-dev-plan-evaluasi-tool-registry.md` | Dev plan + status implementasi + roadmap perbaikan ilmiah |
 | `reports/tool-registry-eval/report.md` | Laporan benchmark synthetic S1–S4 |
-| `reports/tool-registry-eval-gemini-native/report.md` | Laporan Gemini native FC (hasil resmi) + failure analysis |
+| `reports/tool-registry-eval-gemini-native-v2/report.md` | Laporan Gemini native FC v2 (hasil resmi) + failure analysis |
 | `reports/tool-registry-eval-gemini-rich/report.md` | Laporan eksperimen deskripsi kaya — validasi future-work |
 | `outputs/summary.csv` | Raw aggregated metrics synthetic S1–S4 |
-| `outputs/gemini-native/summary.csv` | Gemini native FC metrics S1–S3 (hasil resmi) |
+| `outputs/gemini-native-v2/summary.csv` | Gemini native FC v2 metrics S1–S3 (hasil resmi) |
 | `outputs/gemini-rich/summary.csv` | Gemini rich description metrics S1–S3 (future-work validation) |
 | `arsip-judul/` | Arsip alternatif judul dan dokumen perbandingan lama |

@@ -2,7 +2,7 @@
 
 <!-- Status -->
 ![Status](https://img.shields.io/badge/Status-Eksperimen%20Selesai-brightgreen)
-![Versi](https://img.shields.io/badge/Versi-1.5-blue)
+![Versi](https://img.shields.io/badge/Versi-1.6-blue)
 ![Program Studi](https://img.shields.io/badge/Prodi-PJJ%20Sistem%20Informasi-informational)
 ![Perguruan Tinggi](https://img.shields.io/badge/PT-Universitas%20Siber%20Asia-blueviolet)
 ![Semester](https://img.shields.io/badge/Semester-8-orange)
@@ -27,8 +27,8 @@
 ![Wilcoxon](https://img.shields.io/badge/Wilcoxon%20p-<0.0001-success)
 
 **Tanggal Pembuatan**: 2 Mei 2026
-**Versi Dokumen**: 1.5
-**Status**: Eksperimen Selesai — Synthetic S1–S4 + Gemini Native v2 (100 query, S1–S3 full, n=558)
+**Versi Dokumen**: 1.6
+**Status**: Multi-model comparison in progress — Gemini Native v2 (official, n=558) + MiniMax-M2.7 (S1–S2 selesai) + Claude Sonnet 4.6 (direncanakan)
 
 ---
 
@@ -242,7 +242,7 @@ panggilan tetap).
 | 4 | `03-pertanyaan-untuk-dospem.md` | Daftar pertanyaan terstruktur untuk sesi bimbingan | Mahasiswa | 10 menit |
 | 5 | `plan/01-dev-plan-evaluasi-tool-registry.md` | Rencana implementasi codebase evaluasi, status aktual, dan roadmap perbaikan ilmiah | Mahasiswa | 15 menit |
 | 6 | `reports/tool-registry-eval/report.md` | Laporan benchmark synthetic S1–S4 | Dospem dan Mahasiswa | 10 menit |
-| 7 | `reports/tool-registry-eval-gemini-native/report.md` | Laporan Gemini native FC S1–S3 + failure analysis (hasil resmi) | Dospem dan Mahasiswa | 15 menit |
+| 7 | `reports/tool-registry-eval-gemini-native-v2/report.md` | Laporan Gemini native FC v2 S1–S3 + failure analysis (hasil resmi) | Dospem dan Mahasiswa | 15 menit |
 | 8 | `reports/tool-registry-eval-gemini-rich/report.md` | Laporan eksperimen deskripsi kaya — validasi future-work description quality | Mahasiswa | 10 menit |
 
 Dokumen alternatif judul sebelumnya telah dipindahkan ke folder
@@ -447,7 +447,7 @@ pembimbing pada sesi bimbingan pertama dan sesi-sesi berikutnya.
 | Versi | 1.0 |
 | Tanggal | 2 Mei 2026 |
 | Status | Draft untuk Bimbingan |
-| Penulis | [Nama Mahasiswa] |
+| Penulis | Muhammad Ridwan |
 | Reviewer | [Nama Dosen Pembimbing] |
 | Tanggal Review Terakhir | — (belum direview) |
 | Tanggal Persetujuan | — (belum disetujui) |
@@ -523,8 +523,8 @@ ke dosen pembimbing.
 
 ### 10.1. Mahasiswa
 
-- **Nama**: [Nama Mahasiswa]
-- **NIM**: [NIM]
+- **Nama**: Muhammad Ridwan
+- **NIM**: 220101010009
 - **Email**: [email mahasiswa]
 - **Nomor WhatsApp**: [nomor WA]
 - **GitHub**: [username GitHub]
@@ -563,6 +563,7 @@ ke dosen pembimbing.
 | 1.3 | 5 Mei 2026 | Update hasil resmi: Gemini native function calling (n=156, S1–S3) — token reduction 61–84%, registry accuracy +16–18pp vs baseline |
 | 1.4 | 5 Mei 2026 | Tambah eksperimen gemini-rich: ToolDef.intent + docstring-style descriptions — temuan: template generik menurunkan akurasi, kualitas deskripsi = keunikan per tool |
 | 1.5 | 5 Mei 2026 | Dataset diperluas ke 100 query; uji statistik Wilcoxon+Cohen's d; S3 baseline dijalankan (n=558); Bab 5 threats draft; badges diperbarui |
+| 1.6 | 25 Mei 2026 | Tambah multi-model comparison: MiniMax-M2.7 (S1–S2 selesai) dan Claude Sonnet 4.6 (direncanakan); refaktor backends/ terpisah; resume support pada runner (append mode + skip-done); judul dikunci final |
 
 ---
 
