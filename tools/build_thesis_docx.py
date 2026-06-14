@@ -28,6 +28,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Cm, Pt, RGBColor
+from PIL import Image
 
 # --------------------------------------------------------------------------- #
 # Konfigurasi metadata naskah
@@ -110,6 +111,8 @@ BLACK = RGBColor(0, 0, 0)
 
 # Pola inline markdown: bold > italic > code
 _TOKEN_RE = re.compile(r"(\*\*.+?\*\*|\*.+?\*|`.+?`)")
+# Referensi gambar markdown: ![alt](path)
+_IMG_RE = re.compile(r"^!\[.*?\]\((.+?)\)\s*$")
 
 
 # --------------------------------------------------------------------------- #
@@ -138,6 +141,18 @@ def add_page_number_field(paragraph):
     run._r.append(begin)
     run._r.append(instr)
     run._r.append(end)
+
+
+def _fld_simple(instr, cached="1"):
+    """Bangun field Word sederhana <w:fldSimple> dengan hasil cache."""
+    fld = OxmlElement("w:fldSimple")
+    fld.set(qn("w:instr"), instr)
+    r = OxmlElement("w:r")
+    t = OxmlElement("w:t")
+    t.text = cached
+    r.append(t)
+    fld.append(r)
+    return fld
 
 
 def set_page_number_format(section, fmt, start=None):
@@ -264,6 +279,17 @@ def setup_styles(doc):
         st.paragraph_format.keep_with_next = True
         st.paragraph_format.line_spacing_rule = WD_LINE_SPACING.ONE_POINT_FIVE
 
+    cap = doc.styles["Caption"]
+    cap.font.name = FONT
+    cap.font.size = Pt(12)
+    cap.font.italic = False
+    cap.font.bold = False
+    cap.font.color.rgb = BLACK
+    cap.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    cap.paragraph_format.space_before = Pt(6)
+    cap.paragraph_format.space_after = Pt(6)
+    cap.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+
 
 def setup_page(section):
     section.page_width = Cm(21.0)
@@ -323,6 +349,44 @@ def heading(doc, text, level=1):
 # --------------------------------------------------------------------------- #
 # Render tabel markdown
 # --------------------------------------------------------------------------- #
+def add_caption(doc, kind, chap_no, text, gambar=False, keep_with_next=False):
+    """Caption ber-SEQ otomatis: 'Tabel 2.<SEQ>' / 'Gambar 2.<SEQ>'.
+
+    `\\s 1` mereset nomor SEQ di tiap Heading 1 (per bab); prefiks nomor bab
+    ditulis literal. Field ini yang dikoleksi Daftar Tabel/Gambar (TOC \\c).
+    """
+    p = doc.add_paragraph(style="Caption")
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    if keep_with_next:
+        p.paragraph_format.keep_with_next = True
+    p.add_run(f"{kind} {chap_no}.")
+    p._p.append(_fld_simple(f" SEQ {kind} \\* ARABIC \\s 1 "))
+    txt = text.strip()
+    if gambar and not txt.endswith("."):
+        txt += "."
+    p.add_run(f" {txt}")
+    return p
+
+
+def add_image_centered(doc, rel_path, max_w_cm=12.0, max_h_cm=18.0):
+    """Sisipkan gambar di tengah, diskalakan agar tidak melebihi area halaman."""
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.keep_with_next = True
+    p.paragraph_format.space_before = Pt(6)
+    path = rel_path if rel_path.is_absolute() else (ROOT / rel_path)
+    if not path.exists():
+        r = p.add_run(f"[Gambar tidak ditemukan: {rel_path}]")
+        r.italic = True
+        return p
+    w, h = Image.open(path).size
+    width_cm = max_w_cm
+    if (h / w) * width_cm > max_h_cm:
+        width_cm = max_h_cm * w / h
+    p.add_run().add_picture(str(path), width=Cm(width_cm))
+    return p
+
+
 def render_table(doc, rows):
     """rows: list of list[str] sudah dipisah kolom (termasuk header)."""
     ncol = len(rows[0])
@@ -358,7 +422,7 @@ def split_table_row(line):
     return [c.strip() for c in inner.split("|")]
 
 
-def render_markdown(doc, md_text, captions):
+def render_markdown(doc, md_text, captions, chap_no):
     lines = md_text.splitlines()
     # buang baris judul bab (## diawali '# ') di awal file — ditangani terpisah
     i = 0
@@ -393,15 +457,32 @@ def render_markdown(doc, md_text, captions):
                 render_table(doc, rows)
             continue
 
-        # caption tabel/gambar — tetap menyatu dengan tabel di bawahnya
+        # gambar: ![alt](path) — disisipkan di tengah, fit halaman
+        m_img = _IMG_RE.match(stripped)
+        if m_img:
+            add_image_centered(doc, Path(m_img.group(1).strip()))
+            i += 1
+            continue
+
+        # caption tabel/gambar via SEQ field (auto-numbering + Daftar otomatis)
         if _CAPTION_RE.match(stripped):
-            p = centered(doc, "", space_after=6)
-            p.paragraph_format.keep_with_next = True
-            p.paragraph_format.keep_together = True
-            add_runs(p, stripped)
-            for r in p.runs:
-                r.bold = True
-            captions.append(stripped)
+            m = re.match(
+                r"^(Tabel|Gambar)\s+\d+\.\d+\s+(.*)$", stripped, re.IGNORECASE
+            )
+            if m:
+                kind = m.group(1).capitalize()
+                is_gambar = kind.lower() == "gambar"
+                # Tabel: caption di ATAS tabel → glue ke tabel berikutnya.
+                # Gambar: caption di BAWAH gambar → tidak perlu keep_with_next.
+                add_caption(
+                    doc,
+                    kind,
+                    chap_no,
+                    m.group(2),
+                    gambar=is_gambar,
+                    keep_with_next=not is_gambar,
+                )
+                captions.append(stripped)
             i += 1
             continue
 
@@ -672,13 +753,14 @@ def build_daftar(doc, title, toc_switches, note):
 # --------------------------------------------------------------------------- #
 # Bab body & placeholder
 # --------------------------------------------------------------------------- #
-def build_chapter(doc, entry, captions):
+def build_chapter(doc, entry, captions, chap_no, page_break=True):
     md_file, label, title, outline = entry
-    doc.add_page_break()
+    if page_break:
+        doc.add_page_break()
     heading(doc, f"{label} {title}", level=1)
     if md_file:
         md_text = (BAB_DIR / md_file).read_text(encoding="utf-8")
-        render_markdown(doc, md_text, captions)
+        render_markdown(doc, md_text, captions, chap_no)
     else:
         p = doc.add_paragraph()
         r = p.add_run(f"[{label} BELUM DITULIS]")
@@ -760,16 +842,14 @@ def main():
         doc,
         "DAFTAR TABEL",
         'TOC \\h \\z \\c "Tabel"',
-        "Akan terisi otomatis bila setiap tabel diberi caption melalui fitur "
-        "References > Insert Caption (label: Tabel).",
+        "Terisi otomatis dari caption ber-SEQ; di Word tekan Ctrl+A lalu F9.",
     )
     doc.add_page_break()
     build_daftar(
         doc,
         "DAFTAR GAMBAR",
         'TOC \\h \\z \\c "Gambar"',
-        "Akan terisi otomatis bila setiap gambar diberi caption melalui fitur "
-        "References > Insert Caption (label: Gambar).",
+        "Terisi otomatis dari caption ber-SEQ; di Word tekan Ctrl+A lalu F9.",
     )
 
     # --- Section 3: BODY (angka Arab) ---
@@ -779,19 +859,9 @@ def main():
     footer_page_number(sec_body, WD_ALIGN_PARAGRAPH.CENTER)
 
     captions = []
-    first = True
-    for entry in CHAPTERS:
-        if first:
-            # bab pertama: hindari page-break ganda setelah section break
-            md_file, label, title, outline = entry
-            heading(doc, f"{label} {title}", level=1)
-            if md_file:
-                render_markdown(
-                    doc, (BAB_DIR / md_file).read_text(encoding="utf-8"), captions
-                )
-            first = False
-        else:
-            build_chapter(doc, entry, captions)
+    for idx, entry in enumerate(CHAPTERS):
+        # bab pertama tanpa page-break ganda setelah section break
+        build_chapter(doc, entry, captions, chap_no=idx + 1, page_break=(idx != 0))
 
     build_daftar_pustaka(doc)
     build_lampiran(doc)

@@ -127,7 +127,7 @@ UNSIA-formatted `.docx` by a generator script. **The `.docx` is generated, not h
 
 **Build the compiled draft:**
 ```
-conda activate gradio   # needs python-docx
+conda activate gradio   # needs python-docx + Pillow
 python tools/build_thesis_docx.py   # → draft/Draft-Tugas-Akhir-Muhammadridwan.docx
 ```
 - Reads `bab/*.md` + front-matter metadata (cover w/ `reference/logo.png`, orisinalitas,
@@ -136,6 +136,20 @@ python tools/build_thesis_docx.py   # → draft/Draft-Tugas-Akhir-Muhammadridwan
 - Applies pedoman format: A4; margin L4/T3/B3/R3 cm; TNR 12; spasi 1.5; 3-line tables font 10;
   roman→arabic page numbering (3 sections); `cantSplit`/`tblHeader` so tables never crop across pages.
 - After opening in Word: `Ctrl+A` then `F9` to populate the TOC fields.
+
+**Figures & diagrams (pre-render + commit strategy):**
+- Diagram source = Mermaid `.mmd` in `assets/diagrams/`; render to PNG with
+  `python tools/render_diagrams.py` (uses mermaid.ink HTTP — no Node/Chromium). **Commit both
+  `.mmd` and `.png`** so the docx build stays offline/deterministic.
+- Reference a figure in any `bab/*.md` as `![alt](assets/diagrams/<name>.png)` on its own line,
+  followed by a caption line `Gambar X.Y <Title>`. The generator embeds the PNG centered,
+  auto-scaled to fit the page (≤12 cm wide, ≤18 cm tall), with the caption **below** (pedoman).
+- Tables use a caption line `Tabel X.Y <Title>` placed **above** the markdown table.
+- Captions become real Word **SEQ fields** (`SEQ Tabel/Gambar \* ARABIC \s 1`, auto-reset per bab),
+  so Daftar Tabel & Daftar Gambar auto-populate on `Ctrl+A`→`F9`. The `X.` chapter prefix is literal
+  (from chapter order); the `.Y` index comes from the SEQ field — number them sequentially in markdown.
+- python-docx can't embed SVG → figures must be **PNG** (rendered at high DPI).
+- matplotlib charts from `charts.py` (PNG @ 180 dpi) embed the same way for Bab IV.
 
 ## Relevant Files to Know
 

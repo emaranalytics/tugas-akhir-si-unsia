@@ -49,7 +49,11 @@ Tool Registry zerlo.id memposisikan diri sebagai lapisan multi-kriteria di atas 
 
 ## 2.6 Design Science Research
 
-Penelitian ini menggunakan kerangka *Design Science Research* (DSR) sebagaimana dikemukakan oleh Hevner et al. (2004) [22]. DSR merupakan paradigma penelitian sistem informasi yang berorientasi pada penciptaan dan evaluasi artefak (*artifact*) untuk menyelesaikan masalah organisasi yang teridentifikasi. Kerangka ini terdiri dari lima tahap berurutan: identifikasi masalah (*problem identification*), penetapan tujuan solusi (*objective of solution*), perancangan dan pengembangan artefak (*design and development*), demonstrasi (*demonstration*), dan evaluasi (*evaluation*), yang ditutup dengan komunikasi hasil (*communication*).
+Penelitian ini menggunakan kerangka *Design Science Research* (DSR) sebagaimana dikemukakan oleh Hevner et al. (2004) [22]. DSR merupakan paradigma penelitian sistem informasi yang berorientasi pada penciptaan dan evaluasi artefak (*artifact*) untuk menyelesaikan masalah organisasi yang teridentifikasi. Kerangka ini terdiri dari lima tahap berurutan: identifikasi masalah (*problem identification*), penetapan tujuan solusi (*objective of solution*), perancangan dan pengembangan artefak (*design and development*), demonstrasi (*demonstration*), dan evaluasi (*evaluation*), yang ditutup dengan komunikasi hasil (*communication*). Alur tahapan tersebut beserta titik iterasi perbaikan diilustrasikan pada Gambar 2.1.
+
+![Alur Penelitian DSR](assets/diagrams/alur-penelitian-dsr.png)
+
+Gambar 2.1 Tahapan Design Science Research pada Penelitian Ini
 
 DSR dipilih karena karakteristik penelitian ini yang menghasilkan artefak perangkat lunak konkret — *dataclass* `ToolMeta`, kelas `ToolRegistry`, dan fungsi `registry_filter()` — sekaligus mengukur dampaknya secara kuantitatif. Tahap identifikasi masalah memetakan fenomena *tool overload* dari data operasional zerlo.id; tahap perancangan menghasilkan artefak Tool Registry beserta kerangka evaluasinya; tahap demonstrasi mengintegrasikan artefak ke dalam AI Agent dan menjalankannya pada tiga skenario katalog; dan tahap evaluasi menganalisis hasil menggunakan uji statistik Wilcoxon *signed-rank*, Cohen's d, dan *confidence interval* 95%. Pemetaan tahapan DSR secara rinci diuraikan pada Bab III.
 

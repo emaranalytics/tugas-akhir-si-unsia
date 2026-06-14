@@ -1,0 +1,10 @@
+graph TD
+    A(["1. Identifikasi Masalah"]) --> B(["2. Penetapan Tujuan Solusi"])
+    B --> C(["3. Perancangan &amp; Pengembangan Artefak"])
+    C --> D(["4. Demonstrasi"])
+    D --> E(["5. Evaluasi"])
+    E --> F(["6. Komunikasi"])
+    E -. iterasi perbaikan .-> C
+
+    classDef stage fill:#1f3a93,stroke:#0d1b4c,color:#ffffff,stroke-width:1px;
+    class A,B,C,D,E,F stage;
