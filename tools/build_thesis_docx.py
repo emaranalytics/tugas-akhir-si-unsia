@@ -58,15 +58,7 @@ CHAPTERS = [
     ("bab-2-landasan-teori.md", "BAB II", "LANDASAN TEORI", None),
     ("bab-3-implementasi-metode.md", "BAB III", "IMPLEMENTASI METODE USULAN", None),
     ("bab-4-hasil-analisa.md", "BAB IV", "HASIL DAN ANALISA", None),
-    (
-        None,
-        "BAB V",
-        "KESIMPULAN",
-        [
-            "5.1 Kesimpulan",
-            "5.2 Saran / Future Work",
-        ],
-    ),
+    ("bab-5-kesimpulan.md", "BAB V", "KESIMPULAN", None),
 ]
 
 # Lampiran (placeholder) sesuai sistematika UNSIA

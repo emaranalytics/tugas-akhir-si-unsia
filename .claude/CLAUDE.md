@@ -123,7 +123,7 @@ UNSIA-formatted `.docx` by a generator script. **The `.docx` is generated, not h
 | Bab II — Landasan Teori | `bab/bab-2-landasan-teori.md` | ✅ Draft (7 sub-bab, 23 IEEE refs, Tabel 2.1 penelitian terdahulu) |
 | Bab III — Implementasi Metode Usulan | `bab/bab-3-implementasi-metode.md` | ✅ Draft (6 sub-bab; Gambar 3.1–3.2, Tabel 3.1–3.4, Kode Program 3.1–3.4) |
 | Bab IV — Hasil dan Analisa | `bab/bab-4-hasil-analisa.md` | ✅ Draft (10 sub-bab; Gambar 4.1–4.5 charts, Tabel 4.1–4.9) |
-| Bab V — Kesimpulan | — | 📋 Placeholder + outline |
+| Bab V — Kesimpulan | `bab/bab-5-kesimpulan.md` | ✅ Draft (3 sub-bab: kesimpulan 4 RQ, keterbatasan & ancaman validitas + Tabel 5.1, saran/future work) |
 
 **Build the compiled draft:**
 ```
