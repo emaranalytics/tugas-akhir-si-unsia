@@ -223,8 +223,11 @@ def add_toc_field(doc, switches='TOC \\o "1-3" \\h \\z \\u'):
     instr.text = switches
     sep = OxmlElement("w:fldChar")
     sep.set(qn("w:fldCharType"), "separate")
+    # Hasil cache field dibiarkan kosong (bukan teks-petunjuk) — field diperbarui
+    # otomatis saat dibuka via <w:updateFields>; lihat set_update_fields_on_open().
     placeholder = OxmlElement("w:t")
-    placeholder.text = "Klik kanan di sini lalu pilih 'Update Field' untuk mengisi daftar."
+    placeholder.set(qn("xml:space"), "preserve")
+    placeholder.text = ""
     end = OxmlElement("w:fldChar")
     end.set(qn("w:fldCharType"), "end")
     r = run._r
@@ -1024,11 +1027,6 @@ def build_lampiran(doc):
         "versi cetak setelah naskah dinyatakan final oleh dosen pembimbing.",
         indent=False,
     )
-    ph = doc.add_paragraph()
-    ph.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    ph.add_run(
-        "[Lampiran bukti Turnitin disisipkan pada tahap finalisasi naskah]"
-    ).italic = True
 
 
 # --------------------------------------------------------------------------- #
@@ -1079,26 +1077,11 @@ def main():
     doc.add_page_break()
     build_kata_pengantar(doc)
     doc.add_page_break()
-    build_daftar(
-        doc,
-        "DAFTAR ISI",
-        'TOC \\o "1-3" \\h \\z \\u',
-        "Daftar Isi otomatis: di Word tekan Ctrl+A lalu F9 untuk memperbarui.",
-    )
+    build_daftar(doc, "DAFTAR ISI", 'TOC \\o "1-3" \\h \\z \\u', "")
     doc.add_page_break()
-    build_daftar(
-        doc,
-        "DAFTAR TABEL",
-        'TOC \\h \\z \\c "Tabel"',
-        "Terisi otomatis dari caption ber-SEQ; di Word tekan Ctrl+A lalu F9.",
-    )
+    build_daftar(doc, "DAFTAR TABEL", 'TOC \\h \\z \\c "Tabel"', "")
     doc.add_page_break()
-    build_daftar(
-        doc,
-        "DAFTAR GAMBAR",
-        'TOC \\h \\z \\c "Gambar"',
-        "Terisi otomatis dari caption ber-SEQ; di Word tekan Ctrl+A lalu F9.",
-    )
+    build_daftar(doc, "DAFTAR GAMBAR", 'TOC \\h \\z \\c "Gambar"', "")
 
     # --- Section 3: BODY (angka Arab) ---
     sec_body = doc.add_section(WD_SECTION.NEW_PAGE)
@@ -1119,7 +1102,7 @@ def main():
     print(f"✓ Naskah tersimpan: {OUT_FILE.relative_to(ROOT)}")
     print(f"  Bab termuat   : {sum(1 for c in CHAPTERS if c[0])} / {len(CHAPTERS)}")
     print(f"  Caption tabel : {len(captions)} ({', '.join(captions) or '—'})")
-    print("  Buka di Word → Ctrl+A → F9 untuk memperbarui Daftar Isi.")
+    print("  Field auto-update saat dibuka; LibreOffice: Tools → Update → Update All.")
 
 
 if __name__ == "__main__":
