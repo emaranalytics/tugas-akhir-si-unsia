@@ -61,6 +61,80 @@ CHAPTERS = [
     ("bab-5-kesimpulan.md", "BAB V", "KESIMPULAN", None),
 ]
 
+# Daftar Pustaka konsolidasi (IEEE, urut kemunculan pertama di naskah Bab I–V).
+# Sumber sitasi in-text [n] di bab/*.md sudah dinomori ulang agar konsisten
+# dengan daftar ini. Format inline `*...*` dirender miring oleh add_runs().
+REFERENCES = [
+    'OpenAI, "Function calling and other API updates," *OpenAI Blog*, Jun. 2023. '
+    "[Online]. Tersedia: https://openai.com/index/function-calling-and-other-api-updates/",
+    'Google DeepMind, "Gemini API function calling," *Google AI Developer '
+    "Documentation*, 2024. [Online]. Tersedia: "
+    "https://ai.google.dev/gemini-api/docs/function-calling",
+    "T. Schick, J. Dwivedi-Yu, R. Dessi, R. Raileanu, M. Lomeli, E. Hambro, "
+    'L. Zettlemoyer, N. Cancedda, dan T. Scialom, "Toolformer: Language models '
+    'can teach themselves to use tools," in *Proc. Adv. Neural Inf. Process. '
+    "Syst. (NeurIPS)*, 2023. arXiv:2302.04761.",
+    "S. Yao, J. Zhao, D. Yu, N. Du, I. Shafran, K. Narasimhan, dan Y. Cao, "
+    '"ReAct: Synergizing reasoning and acting in language models," in *Proc. '
+    "Int. Conf. Learn. Representations (ICLR)*, 2023. arXiv:2210.03629.",
+    "N.F. Liu, K. Lin, J. Hewitt, A. Paranjape, M. Bevilacqua, F. Petroni, dan "
+    'P. Liang, "Lost in the middle: How language models use long contexts," '
+    "*Trans. Assoc. Comput. Linguistics*, vol. 12, pp. 157–173, 2024. "
+    "arXiv:2307.03172.",
+    'T.B. Lee, "How long contexts hurt AI performance," *Understanding AI* '
+    "(Newsletter), Nov. 2025. [Online]. Tersedia: "
+    "https://www.understandingai.org/p/how-long-contexts-hurt-ai-performance",
+    "P. Rajasekaran, E. Dixon, C. Ryan, dan J. Hadfield, "
+    '"Effective context engineering for AI agents," *Anthropic Engineering '
+    "Blog*, Sep. 2025.",
+    "S.G. Patil, T. Zhang, X. Wang, dan J.E. Gonzalez, "
+    '"Gorilla: Large language model connected with massive APIs," in *Proc. '
+    "Adv. Neural Inf. Process. Syst. (NeurIPS)*, 2024. arXiv:2305.15334.",
+    'Y. Qin et al., "ToolLLM: Facilitating large language models to master '
+    '16000+ real-world APIs," in *Proc. Int. Conf. Learn. Representations '
+    "(ICLR)*, 2024. arXiv:2307.16789.",
+    'E. Lumer, "Toolshed: Scale tool-equipped agents with advanced RAG-tool '
+    'fusion and tool knowledge bases," arXiv:2410.14594, 2024.',
+    "N. Gaurav, A. Akarsh, A. Ranjan, dan M. Bajaj, "
+    '"Dynamic ReAct: Scalable tool selection for large-scale MCP environments," '
+    "arXiv:2509.20386, 2025.",
+    'J. Jia dan Q. Li, "AutoTool: Efficient tool selection for large language '
+    'model agents," in *Proc. AAAI Conf. Artif. Intell. (AAAI)*, 2026. '
+    "arXiv:2511.14650.",
+    "W. Wang, P. Niu, Z. Xu, et al., "
+    '"MCP-Flow: Facilitating LLM agents to master real-world, diverse and '
+    'scaling MCP tools," in *Proc. Assoc. Comput. Linguistics (ACL)*, 2026. '
+    "arXiv:2510.24284.",
+    'P. CN, "Build scalable AI agent systems using Amazon Bedrock agent '
+    'registry," *AWS Machine Learning Blog*, Apr. 2026.',
+    "A.R. Hevner, S.T. March, J. Park, dan S. Ram, "
+    '"Design science in information systems research," *MIS Quarterly*, '
+    "vol. 28, no. 1, pp. 75–105, Mar. 2004.",
+    'T.B. Lee, "Context rot: The emerging challenge that could hold back LLM '
+    'progress," *Understanding AI* (Newsletter), Nov. 2025. [Online]. '
+    "Tersedia: https://www.understandingai.org/p/context-rot-the-emerging-challenge",
+    '"Context length alone hurts LLM performance despite perfect retrieval," '
+    "arXiv:2510.05381, 2025.",
+    'Y. Qu et al., "Towards completeness-oriented tool retrieval for large '
+    'language models," in *Proc. ACM Int. Conf. Inf. Knowl. Manag. (CIKM)*, '
+    "2024. arXiv:2405.16089.",
+    'S.G. Patil et al., "The Berkeley function calling leaderboard (BFCL): '
+    'From tool use to agentic evaluation of large language models," in *Proc. '
+    "Int. Conf. Mach. Learn. (ICML)*, 2025.",
+    '"ScaleMCP: Dynamic and auto-synchronizing model context protocol tools '
+    'for LLM agents," arXiv:2505.06416, 2025.',
+    'TrueFoundry, "What is AI agent registry — A complete guide," *TrueFoundry '
+    "Blog*, Sep. 2025. [Online]. Tersedia: "
+    "https://www.truefoundry.com/blog/ai-agent-registry",
+    'I. Kolchinsky, "Tool RAG: The next breakthrough in scalable AI agents," '
+    "*Red Hat Emerging Technologies Blog*, Nov. 2025.",
+    'Pydantic, "Pydantic AI — Toolsets," *Pydantic AI Documentation*, 2025. '
+    "[Online]. Tersedia: https://ai.pydantic.dev/",
+    'C. Richardson, "Pattern: API gateway / Backends for frontends," '
+    "*microservices.io*, 2014–2025. [Online]. Tersedia: "
+    "https://microservices.io/patterns/apigateway.html",
+]
+
 # Lampiran (placeholder) sesuai sistematika UNSIA
 LAMPIRAN_ITEMS = [
     "Lampiran A: Source Code Tool Registry (cuplikan kunci)",
@@ -774,23 +848,24 @@ def build_kata_pengantar(doc):
 
 
 def build_abstrak(doc):
-    heading(doc, "ABSTRAK", level=1)
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-    p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
-    r = p.add_run(
-        "[PLACEHOLDER — abstrak final ditulis setelah Bab IV selesai. "
-        "Abstrak wajib dwibahasa (Indonesia & Inggris), maksimal 200 kata per "
-        "bahasa, satu paragraf, memuat: latar belakang, tujuan, metode, hasil "
-        "(temuan baru), dan implikasi. Tidak boleh mengacu pustaka, gambar, atau "
-        "tabel.]"
-    )
-    r.italic = True
-    centered(doc, "")
-    kp = doc.add_paragraph()
-    kp.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
-    kp.add_run("Kata Kunci : ").bold = True
-    kp.add_run("[maksimal 5 kata/frasa, urut abjad]").italic = True
+    """Abstrak dwibahasa dari `bab/abstrak.md` (spasi 1, justify, satu paragraf
+    per bahasa diikuti baris Kata Kunci/Keywords)."""
+    md = (BAB_DIR / "abstrak.md").read_text(encoding="utf-8")
+    blocks = [b.strip() for b in re.split(r"^# ", md, flags=re.M) if b.strip()]
+    for n, blk in enumerate(blocks):
+        lines = [ln for ln in blk.split("\n") if ln.strip()]
+        title = lines[0].strip()
+        if n:
+            centered(doc, "")  # pemisah antar-bahasa
+        heading(doc, title, level=1)
+        for raw in lines[1:]:
+            line = raw.strip()
+            p = doc.add_paragraph()
+            p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+            p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+            if not (line.startswith("**Kata Kunci") or line.startswith("**Keywords")):
+                p.paragraph_format.first_line_indent = Cm(1.27)
+            add_runs(p, line)
 
 
 def build_daftar(doc, title, toc_switches, note):
@@ -837,25 +912,123 @@ def build_chapter(doc, entry, captions, chap_no, page_break=True):
 def build_daftar_pustaka(doc):
     doc.add_page_break()
     heading(doc, "DAFTAR PUSTAKA", level=1)
-    p = doc.add_paragraph()
-    r = p.add_run(
-        "[PLACEHOLDER — daftar pustaka final dikonsolidasikan dari seluruh "
-        "referensi per-bab menjadi satu daftar IEEE berurutan sesuai kemunculan "
-        "pertama di naskah, dikelola dengan Mendeley/Zotero. Saat ini referensi "
-        "masih tercantum di akhir tiap bab.]"
-    )
-    r.italic = True
+    centered(doc, "")
+    for n, ref in enumerate(REFERENCES, start=1):
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        pf = p.paragraph_format
+        pf.line_spacing_rule = WD_LINE_SPACING.SINGLE
+        pf.space_after = Pt(6)
+        pf.left_indent = Cm(1.0)
+        pf.first_line_indent = Cm(-1.0)  # hanging indent ala IEEE
+        p.add_run(f"[{n}] ")
+        add_runs(p, ref)
+
+
+def _lampiran_heading(doc, title):
+    h = doc.add_paragraph(style="Heading 2")
+    h.add_run(title)
+
+
+def _embed_source(doc, rel_path, intro, max_lines=0):
+    """Sisipkan isi file sumber sebagai code block (dibaca saat build agar
+    selalu sinkron dengan repositori)."""
+    body_paragraph(doc, intro, indent=False)
+    text = (ROOT / rel_path).read_text(encoding="utf-8")
+    lines = text.splitlines()
+    truncated = False
+    if max_lines and len(lines) > max_lines:
+        lines = lines[:max_lines]
+        truncated = True
+    centered(doc, rel_path, italic=True, size=10)
+    add_code_block(doc, lines)
+    if truncated:
+        body_paragraph(
+            doc,
+            f"(Cuplikan {max_lines} baris pertama; berkas lengkap tersedia pada "
+            f"repositori penelitian: {rel_path}.)",
+            indent=False,
+        )
 
 
 def build_lampiran(doc):
     doc.add_page_break()
     heading(doc, "LAMPIRAN", level=1)
-    for item in LAMPIRAN_ITEMS:
-        h = doc.add_paragraph(style="Heading 2")
-        h.add_run(item)
-        ph = doc.add_paragraph()
-        ph.paragraph_format.first_line_indent = Cm(1.27)
-        ph.add_run("[konten belum dilampirkan]").italic = True
+
+    # --- Lampiran A: Source code Tool Registry ---
+    _lampiran_heading(doc, "Lampiran A: Source Code Tool Registry (Cuplikan Kunci)")
+    _embed_source(
+        doc,
+        "src/tool_registry_eval/registry.py",
+        "Modul registry berisi struktur metadata dan fungsi penyaringan "
+        "`registry_filter()` yang menjadi artefak utama penelitian ini.",
+    )
+
+    # --- Lampiran B: Dataset 100 query ---
+    _lampiran_heading(doc, "Lampiran B: Dataset 100 Kueri Evaluasi (JSON)")
+    body_paragraph(
+        doc,
+        "Dataset evaluasi terdiri dari 100 kueri berbahasa Indonesia (50 "
+        "single-domain, 30 cross-domain, 20 adversarial). Berikut cuplikan "
+        "representatif; berkas lengkap tersedia pada lampiran/dataset-100-query.json.",
+        indent=False,
+    )
+    try:
+        import json as _json
+
+        data = _json.loads(
+            (ROOT / "lampiran" / "dataset-100-query.json").read_text(encoding="utf-8")
+        )
+        sample, seen = [], {}
+        for q in data:
+            t = q.get("query_type")
+            if seen.get(t, 0) < 2:
+                sample.append(q)
+                seen[t] = seen.get(t, 0) + 1
+        snippet = _json.dumps(sample, ensure_ascii=False, indent=2)
+        add_code_block(doc, snippet.splitlines())
+    except FileNotFoundError:
+        body_paragraph(doc, "[dataset-100-query.json belum di-generate]", indent=False)
+
+    # --- Lampiran C: Raw results CSV ---
+    _lampiran_heading(doc, "Lampiran C: Hasil Mentah Eksperimen (CSV)")
+    _embed_source(
+        doc,
+        "outputs/gemini-native-v2/summary.csv",
+        "Ringkasan agregat per skenario dan mode (Gemini Native v2, n=558), "
+        "diproduksi otomatis dari rekaman JSONL inkremental.",
+    )
+    _embed_source(
+        doc,
+        "outputs/gemini-native-v2/statistical_tests.csv",
+        "Hasil uji statistik penghematan token (Wilcoxon, Cohen's d, CI 95%) dan "
+        "akurasi per skenario.",
+    )
+
+    # --- Lampiran D: Script analisis statistik ---
+    _lampiran_heading(doc, "Lampiran D: Script Analisis Statistik (Python)")
+    _embed_source(
+        doc,
+        "src/tool_registry_eval/measure.py",
+        "Modul pengukuran yang menghitung uji Wilcoxon signed-rank berpasangan, "
+        "ukuran efek Cohen's d, dan selang kepercayaan 95% atas penghematan token.",
+    )
+
+    # --- Lampiran E: Bukti Turnitin ---
+    _lampiran_heading(doc, "Lampiran E: Bukti Similarity Check Turnitin (≤30%)")
+    body_paragraph(
+        doc,
+        "Pemeriksaan kemiripan (*similarity check*) dilakukan menggunakan Turnitin "
+        "atas naskah final Bab I–V. Bukti berupa halaman ringkasan Turnitin "
+        "(*similarity report*) dengan skor kemiripan maksimal 30% dilampirkan pada "
+        "versi cetak setelah naskah dinyatakan final oleh dosen pembimbing.",
+        indent=False,
+    )
+    ph = doc.add_paragraph()
+    ph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    ph.add_run(
+        "[Lampiran bukti Turnitin disisipkan pada tahap finalisasi naskah]"
+    ).italic = True
 
 
 # --------------------------------------------------------------------------- #

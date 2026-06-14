@@ -125,6 +125,11 @@ UNSIA-formatted `.docx` by a generator script. **The `.docx` is generated, not h
 | Bab IV — Hasil dan Analisa | `bab/bab-4-hasil-analisa.md` | ✅ Draft (10 sub-bab; Gambar 4.1–4.5 charts, Tabel 4.1–4.9) |
 | Bab V — Kesimpulan | `bab/bab-5-kesimpulan.md` | ✅ Draft (3 sub-bab: kesimpulan 4 RQ, keterbatasan & ancaman validitas + Tabel 5.1, saran/future work) |
 
+**Front matter & back matter (submission-ready, generated):**
+- **Abstrak** dwibahasa di `bab/abstrak.md` (ID 170 kata + EN 187 kata, ≤200, satu paragraf, spasi 1; 5 kata kunci urut abjad). `build_abstrak()` membacanya.
+- **Daftar Pustaka** dikonsolidasi jadi satu daftar IEEE global (24 referensi unik, urut kemunculan pertama Bab I→V) di konstanta `REFERENCES`. Sitasi in-text `[n]` di tiap bab **sudah dinomori ulang** ke skema global (per-chapter "Referensi Bab X" dihapus). Jangan tambah sitasi tanpa update `REFERENCES` + renumber.
+- **Lampiran A–E** terisi konten nyata (dibaca saat build): A=`src/tool_registry_eval/registry.py`, B=sampel dari `lampiran/dataset-100-query.json` (100 kueri, 50/30/20), C=`outputs/gemini-native-v2/summary.csv` + `statistical_tests.csv`, D=`src/tool_registry_eval/measure.py`, E=instruksi/placeholder bukti Turnitin (langkah eksternal user, ≤30%).
+
 **Build the compiled draft:**
 ```
 conda activate gradio   # needs python-docx + Pillow

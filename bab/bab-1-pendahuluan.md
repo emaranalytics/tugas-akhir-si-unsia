@@ -91,37 +91,3 @@ Penelitian ini menggunakan pendekatan *Design Science Research* (DSR) sebagaiman
 (d) analisis perbandingan akurasi pemilihan *tool* antara mode *baseline* dan *registry*.
 
 Seluruh data eksperimen disimpan dalam format JSONL yang dapat dilanjutkan (*resume-safe*) untuk memastikan reprodusibilitas. Total rekaman yang dihasilkan adalah n=558 (279 *baseline* + 279 *registry*) dari eksperimen resmi Gemini Native v2.
-
----
-
-**Referensi Bab I**
-
-[1] OpenAI, "Function calling," OpenAI Developer Documentation, Jun. 2023. [Online]. Tersedia: https://platform.openai.com/docs/guides/function-calling
-
-[2] Google DeepMind, "Gemini API function calling," Google AI Developer Documentation, 2024. [Online]. Tersedia: https://ai.google.dev/gemini-api/docs/function-calling
-
-[3] T. Schick, J. Dwivedi-Yu, R. Dessi, R. Raileanu, M. Lomeli, E. Hambro, L. Zettlemoyer, N. Cancedda, dan T. Scialom, "Toolformer: Language models can teach themselves to use tools," in *Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)*, 2023.
-
-[4] S. Yao, J. Zhao, D. Yu, N. Du, I. Shafran, K. Narasimhan, dan Y. Cao, "ReAct: Synergizing reasoning and acting in language models," in *Proc. Int. Conf. Learn. Representations (ICLR)*, 2023. arXiv:2210.03629.
-
-[5] N.F. Liu, K. Lin, J. Hewitt, A. Paranjape, M. Bevilacqua, F. Petroni, dan P. Liang, "Lost in the middle: How language models use long contexts," *Trans. Assoc. Comput. Linguistics*, vol. 12, pp. 157–173, 2024. arXiv:2307.03172.
-
-[6] T.B. Lee, "How long contexts hurt AI performance," *Understanding AI* (Newsletter), Nov. 2025. [Online]. Tersedia: https://www.understandingai.org/p/how-long-contexts-hurt-ai-performance
-
-[7] P. Rajasekaran, E. Dixon, C. Ryan, dan J. Hadfield, "Effective context engineering for AI agents," *Anthropic Engineering Blog*, Sep. 2025.
-
-[8] S.G. Patil, T. Zhang, X. Wang, dan J.E. Gonzalez, "Gorilla: Large language model connected with massive APIs," in *Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)*, 2024. arXiv:2305.15334.
-
-[9] Y. Qin et al., "ToolLLM: Facilitating large language models to master 16000+ real-world APIs," in *Proc. Int. Conf. Learn. Representations (ICLR)*, 2024. arXiv:2307.16789.
-
-[10] E. Lumer, "Toolshed: Scale tool-equipped agents with advanced RAG-tool fusion and tool knowledge bases," arXiv:2410.14594, 2024.
-
-[11] N. Gaurav, A. Akarsh, A. Ranjan, dan M. Bajaj, "Dynamic ReAct: Scalable tool selection for large-scale MCP environments," arXiv:2509.20386, 2025.
-
-[12] J. Jia dan Q. Li, "AutoTool: Efficient tool selection for large language model agents," in *Proc. AAAI Conf. Artif. Intell. (AAAI)*, 2026. arXiv:2511.14650.
-
-[13] W. Wang et al., "MCP-Flow: Facilitating LLM agents to master real-world, diverse and scaling MCP tools," in *Proc. Assoc. Comput. Linguistics (ACL)*, 2026. arXiv:2510.24284.
-
-[14] P. CN, "Build scalable AI agent systems using Amazon Bedrock agent registry," *AWS Machine Learning Blog*, Apr. 2026.
-
-[15] A.R. Hevner, S.T. March, J. Park, dan S. Ram, "Design science in information systems research," *MIS Quarterly*, vol. 28, no. 1, pp. 75–105, Mar. 2004.

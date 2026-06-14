@@ -1,7 +1,7 @@
 # BAB III
 # IMPLEMENTASI METODE USULAN
 
-Bab ini menguraikan rancangan dan implementasi artefak Tool Registry beserta kerangka evaluasinya, mengikuti tahap *design and development* pada kerangka *Design Science Research* [1]. Pembahasan dimulai dari analisis sistem eksisting zerlo.id sebagai sumber masalah, dilanjutkan dengan perancangan struktur metadata dan *pipeline* penyaringan, perancangan kerangka evaluasi, lalu penelusuran kode (*code walkthrough*) atas implementasi Tool Registry dan *eval runner*, dan ditutup dengan konfigurasi eksperimen yang dikendalikan.
+Bab ini menguraikan rancangan dan implementasi artefak Tool Registry beserta kerangka evaluasinya, mengikuti tahap *design and development* pada kerangka *Design Science Research* [15]. Pembahasan dimulai dari analisis sistem eksisting zerlo.id sebagai sumber masalah, dilanjutkan dengan perancangan struktur metadata dan *pipeline* penyaringan, perancangan kerangka evaluasi, lalu penelusuran kode (*code walkthrough*) atas implementasi Tool Registry dan *eval runner*, dan ditutup dengan konfigurasi eksperimen yang dikendalikan.
 
 
 ## 3.1 Analisis Sistem Eksisting
@@ -10,12 +10,12 @@ Platform zerlo.id pada tahap *beta testing* mengoperasikan 38 modul bisnis denga
 
 Pendekatan statis ini menimbulkan *bottleneck* yang bersifat O(N) terhadap ukuran katalog: jumlah token input tumbuh proporsional terhadap jumlah *tool* yang terdaftar. Pengukuran awal pada penelitian ini menunjukkan bahwa katalog 300 *tool* (skenario S3) mengonsumsi rata-rata 23.893 token per kueri hanya untuk mendefinisikan *tool* yang tersedia, bahkan sebelum pertanyaan pengguna diproses. Konsumsi token sebesar ini berdampak langsung pada biaya inferensi, latensi respons, dan — sebagaimana dibuktikan oleh fenomena *context rot* yang diuraikan pada Bab II — penurunan akurasi pemilihan *tool* akibat sebagian definisi berada di posisi tengah konteks yang rawan diabaikan.
 
-Kerangka Pydantic AI [2] menyediakan abstraksi `FilteredToolset` yang memungkinkan penyaringan *tool* berdasarkan sebuah predikat tunggal. Namun antarmuka tersebut tidak dirancang untuk penyaringan multi-kriteria yang dibutuhkan platform ERP multi-modul, yakni penyaringan simultan berdasarkan modul, peran (*role*), tingkat langganan (*subscription tier*), dan anggaran token (*token budget*). Kesenjangan antara kemampuan predikat tunggal dan kebutuhan penyaringan multi-kriteria inilah yang menjadi motivasi perancangan artefak Tool Registry pada penelitian ini.
+Kerangka Pydantic AI [23] menyediakan abstraksi `FilteredToolset` yang memungkinkan penyaringan *tool* berdasarkan sebuah predikat tunggal. Namun antarmuka tersebut tidak dirancang untuk penyaringan multi-kriteria yang dibutuhkan platform ERP multi-modul, yakni penyaringan simultan berdasarkan modul, peran (*role*), tingkat langganan (*subscription tier*), dan anggaran token (*token budget*). Kesenjangan antara kemampuan predikat tunggal dan kebutuhan penyaringan multi-kriteria inilah yang menjadi motivasi perancangan artefak Tool Registry pada penelitian ini.
 
 
 ## 3.2 Perancangan Tool Registry
 
-Artefak utama yang dirancang adalah lapisan penyaringan deterministik berbasis metadata terstruktur yang ditempatkan di antara katalog *tool* dan LLM. Rancangan ini mengadaptasi prinsip *smallest possible set of high-signal tokens* dari rekayasa konteks Anthropic [3], yakni meneruskan hanya himpunan *tool* paling relevan dan sekecil mungkin kepada model.
+Artefak utama yang dirancang adalah lapisan penyaringan deterministik berbasis metadata terstruktur yang ditempatkan di antara katalog *tool* dan LLM. Rancangan ini mengadaptasi prinsip *smallest possible set of high-signal tokens* dari rekayasa konteks Anthropic [7], yakni meneruskan hanya himpunan *tool* paling relevan dan sekecil mungkin kepada model.
 
 Setiap *tool* direpresentasikan oleh skema metadata terstruktur yang menyimpan atribut penyaringan. Atribut-atribut tersebut dirangkum pada Tabel 3.1.
 
@@ -151,7 +151,7 @@ Pemanggilan `_flush(row)` setelah setiap panggilan memastikan bahwa data tidak h
 
 ## 3.6 Setup Eksperimen
 
-Eksperimen resmi menggunakan model Gemini 2.5 Flash Lite melalui Google Gen AI SDK dengan mekanisme *native function calling* [4]. Seluruh parameter inferensi dikendalikan untuk meminimalkan variabel pengganggu (*confounding variable*), sebagaimana dirangkum pada Tabel 3.4.
+Eksperimen resmi menggunakan model Gemini 2.5 Flash Lite melalui Google Gen AI SDK dengan mekanisme *native function calling* [2]. Seluruh parameter inferensi dikendalikan untuk meminimalkan variabel pengganggu (*confounding variable*), sebagaimana dirangkum pada Tabel 3.4.
 
 Tabel 3.4 Parameter Setup Eksperimen
 
@@ -188,15 +188,3 @@ gen_config = types.GenerateContentConfig(
 ```
 
 Perbedaan tunggal antara mode *baseline* dan *registry* terletak pada himpunan `fn_decls`: pada mode *baseline*, himpunan ini berisi seluruh *tool* katalog (30/100/300), sedangkan pada mode *registry* himpunan ini merupakan keluaran `registry_filter()` yang dibatasi 15 *tool*. Dengan menjaga seluruh parameter lain identik, eksperimen ini mengisolasi dampak penyaringan sebagai satu-satunya perlakuan, sehingga hasil yang dianalisis pada Bab IV dapat diatribusikan secara valid kepada Tool Registry. Untuk meredam kegagalan transien akibat batas laju (*rate limit*) layanan, *backend* dilengkapi mekanisme *retry* dengan *exponential backoff* hingga lima kali percobaan.
-
----
-
-**Referensi Bab III**
-
-[1] A.R. Hevner, S.T. March, J. Park, dan S. Ram, "Design science in information systems research," *MIS Quarterly*, vol. 28, no. 1, pp. 75–105, Mar. 2004.
-
-[2] Pydantic, "Pydantic AI — Toolsets," *Pydantic AI Documentation*, 2025. [Online]. Tersedia: https://ai.pydantic.dev/
-
-[3] P. Rajasekaran, E. Dixon, C. Ryan, dan J. Hadfield, "Effective context engineering for AI agents," *Anthropic Engineering Blog*, Sep. 2025.
-
-[4] Google DeepMind, "Gemini API function calling," *Google AI Developer Documentation*, 2024. [Online]. Tersedia: https://ai.google.dev/gemini-api/docs/function-calling
