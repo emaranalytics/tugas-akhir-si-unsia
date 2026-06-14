@@ -112,11 +112,40 @@ Read the specific file only when the task requires it.
 | `.claude/rules/data-hasil-eksperimen.md` | Angka resmi eksperimen (token, accuracy, latency, Wilcoxon p, Cohen's d) — wajib akurat | Setiap kali menulis Bab IV, abstrak, atau kesimpulan angka |
 | `.claude/rules/referensi-sitasi.md` | Tabel sitasi per topik (Tool RAG, Tool Registry, LLM FC, Context Rot) + format IEEE 11 referensi kunci | Saat menulis Bab II atau menambahkan sitasi ke paragraf apapun |
 
+## Naskah Tugas Akhir (Manuscript Drafts)
+
+Thesis chapters are drafted as Markdown under `bab/`, then compiled into a single
+UNSIA-formatted `.docx` by a generator script. **The `.docx` is generated, not hand-edited.**
+
+| Bab | File | Status |
+|-----|------|--------|
+| Bab I — Pendahuluan | `bab/bab-1-pendahuluan.md` | ✅ Draft (rumusan masalah in *pernyataan* form per pedoman) |
+| Bab II — Landasan Teori | `bab/bab-2-landasan-teori.md` | ✅ Draft (7 sub-bab, 23 IEEE refs, Tabel 2.1 penelitian terdahulu) |
+| Bab III — Implementasi Metode Usulan | — | 📋 Placeholder + outline |
+| Bab IV — Hasil dan Analisa | — | 📋 Placeholder + outline |
+| Bab V — Kesimpulan | — | 📋 Placeholder + outline |
+
+**Build the compiled draft:**
+```
+conda activate gradio   # needs python-docx
+python tools/build_thesis_docx.py   # → draft/Draft-Tugas-Akhir-Muhammadridwan.docx
+```
+- Reads `bab/*.md` + front-matter metadata (cover w/ `reference/logo.png`, orisinalitas,
+  pengesahan, abstrak placeholder, kata pengantar, daftar isi/tabel/gambar as Word TOC fields).
+- To add a finished bab: write its `.md`, set its filename in the `CHAPTERS` list (replace `None`), re-run.
+- Applies pedoman format: A4; margin L4/T3/B3/R3 cm; TNR 12; spasi 1.5; 3-line tables font 10;
+  roman→arabic page numbering (3 sections); `cantSplit`/`tblHeader` so tables never crop across pages.
+- After opening in Word: `Ctrl+A` then `F9` to populate the TOC fields.
+
 ## Relevant Files to Know
 
 - `README.md` — full project narrative with results
 - `02-keputusan-judul-final.md` — thesis title, focus, and all experiment results
 - `00-ringkasan-project-zerlo.md` — zerlo.id overview
+- `bab/` — thesis chapter drafts in Markdown (source of truth for the manuscript)
+- `tools/build_thesis_docx.py` — generator: `bab/*.md` → compiled `.docx`
+- `draft/Draft-Tugas-Akhir-Muhammadridwan.docx` — compiled manuscript (regenerated, do not hand-edit)
+- `reference/Lampiran.pdf` — UNSIA front-matter/template reference the docx structure is based on
 - `plan/01-dev-plan-evaluasi-tool-registry.md` — dev plan and roadmap
 - `plan/02-bab5-threats-to-validity.md` — Bab 5 threats to validity draft
 - `reference/referensi-ilmiah.md` — 21 academic references with full summaries

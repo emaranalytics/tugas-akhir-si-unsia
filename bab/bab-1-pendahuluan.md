@@ -22,15 +22,15 @@ Berdasarkan pemaparan di atas, penelitian ini membangun dan mengevaluasi Tool Re
 
 ## 1.2 Rumusan Masalah
 
-Berdasarkan latar belakang yang telah dipaparkan, rumusan masalah penelitian ini adalah sebagai berikut.
+Berdasarkan latar belakang yang telah dipaparkan, rumusan masalah penelitian ini dinyatakan sebagai berikut.
 
-1. Bagaimana merancang Tool Registry yang menyimpan metadata *tool* secara terstruktur pada platform ERP multi-modul zerlo.id?
+1. Diperlukan rancangan Tool Registry yang mampu menyimpan metadata *tool* secara terstruktur pada platform ERP multi-modul zerlo.id.
 
-2. Bagaimana menerapkan mekanisme penyaringan *tool* (*filtering*) secara dinamis berdasarkan modul, peran, tingkat langganan, dan anggaran token pada AI Agent?
+2. Diperlukan mekanisme penyaringan *tool* (*filtering*) secara dinamis berdasarkan modul, peran, tingkat langganan, dan anggaran token pada AI Agent.
 
-3. Bagaimana dampak penerapan Tool Registry terhadap penggunaan token (*token usage*), latensi (*latency*), dan akurasi pemilihan *tool* (*tool selection accuracy*) dibandingkan dengan pendekatan *baseline* tanpa penyaringan?
+3. Dampak penerapan Tool Registry terhadap penggunaan token (*token usage*), latensi (*latency*), dan akurasi pemilihan *tool* (*tool selection accuracy*) dibandingkan dengan pendekatan *baseline* tanpa penyaringan belum diketahui dan perlu diukur secara kuantitatif.
 
-4. Bagaimana Tool Registry mendukung skalabilitas AI Agent pada platform ERP restoran ketika jumlah *tools* dalam katalog bertambah secara signifikan?
+4. Kemampuan Tool Registry dalam mendukung skalabilitas AI Agent pada platform ERP restoran ketika jumlah *tools* dalam katalog bertambah secara signifikan perlu dibuktikan.
 
 
 ## 1.3 Batasan Masalah
