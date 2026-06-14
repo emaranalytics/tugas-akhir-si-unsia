@@ -26,3 +26,6 @@ artifacts/
 Thumbs.db
 .idea/
 .vscode/
+
+# LibreOffice lock files
+.~lock.*#

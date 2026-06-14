@@ -57,23 +57,7 @@ CHAPTERS = [
     ("bab-1-pendahuluan.md", "BAB I", "PENDAHULUAN", None),
     ("bab-2-landasan-teori.md", "BAB II", "LANDASAN TEORI", None),
     ("bab-3-implementasi-metode.md", "BAB III", "IMPLEMENTASI METODE USULAN", None),
-    (
-        None,
-        "BAB IV",
-        "HASIL DAN ANALISA",
-        [
-            "4.1 Hasil Benchmark Synthetic S1–S4",
-            "4.2 Hasil Gemini Native v2 (Hasil Resmi)",
-            "4.3 Analisis Token Reduction",
-            "4.4 Analisis Tool Selection Accuracy",
-            "4.5 Analisis Sub-linear Scalability",
-            "4.6 Analisis Memory Footprint",
-            "4.7 Analisis Latency",
-            "4.8 Uji Statistik",
-            "4.9 Failure Analysis",
-            "4.10 Validasi Multi-model",
-        ],
-    ),
+    ("bab-4-hasil-analisa.md", "BAB IV", "HASIL DAN ANALISA", None),
     (
         None,
         "BAB V",
@@ -449,11 +433,22 @@ def split_table_row(line):
     return [c.strip() for c in inner.split("|")]
 
 
+def _next_nonblank_is_table(lines, idx):
+    """True bila baris non-kosong berikutnya (mulai idx) adalah baris tabel."""
+    while idx < len(lines):
+        if not lines[idx].strip():
+            idx += 1
+            continue
+        return bool(_TABLE_ROW_RE.match(lines[idx]))
+    return False
+
+
 def render_markdown(doc, md_text, captions, chap_no):
     lines = md_text.splitlines()
     # buang baris judul bab (## diawali '# ') di awal file — ditangani terpisah
     i = 0
     n = len(lines)
+    last_was_image = False  # untuk deteksi caption Gambar (caption di bawah gambar)
     while i < n:
         line = lines[i]
         stripped = line.strip()
@@ -461,6 +456,10 @@ def render_markdown(doc, md_text, captions, chap_no):
         if not stripped:
             i += 1
             continue
+
+        # tandai apakah baris sebelumnya (non-kosong) adalah gambar, lalu reset
+        was_image = last_was_image
+        last_was_image = False
 
         # judul bab (sudah dirender manual) — lewati H1 di paling atas
         if stripped.startswith("# "):
@@ -514,10 +513,14 @@ def render_markdown(doc, md_text, captions, chap_no):
         m_img = _IMG_RE.match(stripped)
         if m_img:
             add_image_centered(doc, Path(m_img.group(1).strip()))
+            last_was_image = True
             i += 1
             continue
 
-        # caption tabel/gambar via SEQ field (auto-numbering + Daftar otomatis)
+        # caption tabel/gambar via SEQ field (auto-numbering + Daftar otomatis).
+        # Deteksi sadar-konteks agar kalimat yang kebetulan diawali "Tabel X.Y ..."
+        # tidak ikut dianggap caption: caption Tabel harus diikuti tabel, caption
+        # Gambar harus tepat mengikuti sebuah gambar.
         if _CAPTION_RE.match(stripped):
             m = re.match(
                 r"^(Tabel|Gambar)\s+\d+\.\d+\s+(.*)$", stripped, re.IGNORECASE
@@ -525,19 +528,25 @@ def render_markdown(doc, md_text, captions, chap_no):
             if m:
                 kind = m.group(1).capitalize()
                 is_gambar = kind.lower() == "gambar"
-                # Tabel: caption di ATAS tabel → glue ke tabel berikutnya.
-                # Gambar: caption di BAWAH gambar → tidak perlu keep_with_next.
-                add_caption(
-                    doc,
-                    kind,
-                    chap_no,
-                    m.group(2),
-                    gambar=is_gambar,
-                    keep_with_next=not is_gambar,
+                is_caption = (
+                    (is_gambar and was_image)
+                    or (not is_gambar and _next_nonblank_is_table(lines, i + 1))
                 )
-                captions.append(stripped)
-            i += 1
-            continue
+                if is_caption:
+                    # Tabel: caption di ATAS tabel → glue ke tabel berikutnya.
+                    # Gambar: caption di BAWAH gambar → tidak perlu keep_with_next.
+                    add_caption(
+                        doc,
+                        kind,
+                        chap_no,
+                        m.group(2),
+                        gambar=is_gambar,
+                        keep_with_next=not is_gambar,
+                    )
+                    captions.append(stripped)
+                    i += 1
+                    continue
+            # bukan caption sejati → biarkan jatuh ke paragraf biasa di bawah
 
         # heading sub-bab
         if stripped.startswith("### "):

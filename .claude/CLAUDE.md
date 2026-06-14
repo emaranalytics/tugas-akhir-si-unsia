@@ -122,7 +122,7 @@ UNSIA-formatted `.docx` by a generator script. **The `.docx` is generated, not h
 | Bab I — Pendahuluan | `bab/bab-1-pendahuluan.md` | ✅ Draft (rumusan masalah in *pernyataan* form per pedoman) |
 | Bab II — Landasan Teori | `bab/bab-2-landasan-teori.md` | ✅ Draft (7 sub-bab, 23 IEEE refs, Tabel 2.1 penelitian terdahulu) |
 | Bab III — Implementasi Metode Usulan | `bab/bab-3-implementasi-metode.md` | ✅ Draft (6 sub-bab; Gambar 3.1–3.2, Tabel 3.1–3.4, Kode Program 3.1–3.4) |
-| Bab IV — Hasil dan Analisa | — | 📋 Placeholder + outline |
+| Bab IV — Hasil dan Analisa | `bab/bab-4-hasil-analisa.md` | ✅ Draft (10 sub-bab; Gambar 4.1–4.5 charts, Tabel 4.1–4.9) |
 | Bab V — Kesimpulan | — | 📋 Placeholder + outline |
 
 **Build the compiled draft:**
@@ -149,8 +149,13 @@ python tools/build_thesis_docx.py   # → draft/Draft-Tugas-Akhir-Muhammadridwan
   so Daftar Tabel & Daftar Gambar auto-populate on `Ctrl+A`→`F9`. The `X.` chapter prefix is literal
   (from chapter order); the `.Y` index comes from the SEQ field — number them sequentially in markdown.
 - python-docx can't embed SVG → figures must be **PNG** (rendered at high DPI).
-- matplotlib charts from `charts.py` (PNG @ 180 dpi) embed the same way for Bab IV.
+- Bab IV charts: `python tools/render_charts_thesis.py` → `assets/charts/*.png` (Indonesian labels,
+  value annotations, @180 dpi) read straight from `outputs/gemini-native-v2/summary.csv`. This is a
+  thesis-only script; the pipeline's `charts.py` (English labels) is left untouched.
 - Diagrams rendered so far: `alur-penelitian-dsr` (Bab II), `arsitektur-tool-registry` + `alur-eval-runner` (Bab III).
+- Caption detection is **context-aware**: a `Tabel X.Y` line is only a caption if a table follows it,
+  a `Gambar X.Y` line only if an image precedes it — so prose starting "Tabel 4.1 menunjukkan…" is NOT
+  mis-parsed as a caption (which would also corrupt SEQ numbering). Still, prefer "Berdasarkan Tabel X.Y, …".
 - **Code listings:** fenced ```` ``` ```` blocks render as shaded monospace (Courier New 9pt, single-spacing,
   `cantSplit`-style `keep_together` ≤30 lines). Caption line `Kode Program X.Y <Title>` placed **above** the
   block renders centered (manual numbering, NOT a SEQ field — kept out of Daftar Tabel/Gambar).
