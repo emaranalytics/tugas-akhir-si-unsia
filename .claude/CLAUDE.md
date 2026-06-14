@@ -138,6 +138,10 @@ python tools/build_thesis_docx.py   # → draft/Draft-Tugas-Akhir-Muhammadridwan
 - The `.docx` carries `<w:updateFields val="true"/>` so DAFTAR ISI/TABEL/GAMBAR + SEQ
   numbers refresh on open. LibreOffice: confirm the update dialog, or **Tools → Update →
   Update All** (the LibreOffice equivalent of Word's Ctrl+A→F9). Run it before PDF export.
+- Headless render/verify (no GUI): `/opt/libreoffice26.2/program/python` + UNO bridge —
+  load doc, `getDocumentIndexes()` should be 3 (not 0), update via dispatcher, `storeToURL`
+  PDF. Headless `--convert-to pdf` alone does NOT update fields. (Run needs sandbox disabled;
+  avoid foreground `sleep` in the bash wrapper — it's blocked by the harness.)
 - Reads `bab/*.md` + front-matter metadata (cover w/ `reference/logo.png`, orisinalitas,
   pengesahan, abstrak placeholder, kata pengantar, daftar isi/tabel/gambar as Word TOC fields).
 - To add a finished bab: write its `.md`, set its filename in the `CHAPTERS` list (replace `None`), re-run.
@@ -153,9 +157,15 @@ python tools/build_thesis_docx.py   # → draft/Draft-Tugas-Akhir-Muhammadridwan
   followed by a caption line `Gambar X.Y <Title>`. The generator embeds the PNG centered,
   auto-scaled to fit the page (≤12 cm wide, ≤18 cm tall), with the caption **below** (pedoman).
 - Tables use a caption line `Tabel X.Y <Title>` placed **above** the markdown table.
-- Captions become real Word **SEQ fields** (`SEQ Tabel/Gambar \* ARABIC \s 1`, auto-reset per bab),
-  so Daftar Tabel & Daftar Gambar auto-populate on `Ctrl+A`→`F9`. The `X.` chapter prefix is literal
-  (from chapter order); the `.Y` index comes from the SEQ field — number them sequentially in markdown.
+- Captions become real Word **SEQ fields** so Daftar Tabel & Daftar Gambar auto-populate on update.
+  The `X.` chapter prefix is literal (from chapter order); the `.Y` index comes from the SEQ field —
+  number them sequentially in markdown. Per-bab reset uses **`SEQ … \r 1`** on the *first* caption of
+  each kind per chapter (tracked in `_SEQ_RESET_SEEN`), NOT Word's `\s 1` — **LibreOffice ignores
+  `\s 1`** (numbers would run continuously 1..N across chapters: Tabel 3.2, 4.6, 5.15…). `\r 1` is
+  honoured by both Word and LibreOffice. Verified via headless LibreOffice render.
+- **TOC/daftar field cached result must be non-empty** (a single space, `xml:space=preserve`) or
+  LibreOffice drops the run and stops treating DAFTAR ISI/TABEL/GAMBAR as updatable indexes
+  (`getDocumentIndexes()` → 0, Update All does nothing). It's replaced by the real list on update.
 - python-docx can't embed SVG → figures must be **PNG** (rendered at high DPI).
 - Bab IV charts: `python tools/render_charts_thesis.py` → `assets/charts/*.png` (Indonesian labels,
   value annotations, @180 dpi) read straight from `outputs/gemini-native-v2/summary.csv`. This is a
