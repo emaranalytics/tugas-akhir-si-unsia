@@ -927,7 +927,6 @@ def build_chapter(doc, entry, captions, chap_no, page_break=True):
 
 
 def build_daftar_pustaka(doc):
-    doc.add_page_break()
     heading(doc, "DAFTAR PUSTAKA", level=1)
     centered(doc, "")
     for n, ref in enumerate(REFERENCES, start=1):
@@ -969,7 +968,6 @@ def _embed_source(doc, rel_path, intro, max_lines=0):
 
 
 def build_lampiran(doc):
-    doc.add_page_break()
     heading(doc, "LAMPIRAN", level=1)
 
     # --- Lampiran A: Source code Tool Registry ---
@@ -1109,7 +1107,9 @@ def main():
         # bab pertama tanpa page-break ganda setelah section break
         build_chapter(doc, entry, captions, chap_no=idx + 1, page_break=(idx != 0))
 
+    doc.add_page_break()
     build_daftar_pustaka(doc)
+    doc.add_page_break()
     build_lampiran(doc)
 
     set_update_fields_on_open(doc)
