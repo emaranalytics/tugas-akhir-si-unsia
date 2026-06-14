@@ -223,11 +223,14 @@ def add_toc_field(doc, switches='TOC \\o "1-3" \\h \\z \\u'):
     instr.text = switches
     sep = OxmlElement("w:fldChar")
     sep.set(qn("w:fldCharType"), "separate")
-    # Hasil cache field dibiarkan kosong (bukan teks-petunjuk) — field diperbarui
-    # otomatis saat dibuka via <w:updateFields>; lihat set_update_fields_on_open().
+    # Hasil cache field WAJIB non-kosong agar LibreOffice/Word tetap mengenali
+    # field sebagai indeks yang dapat diperbarui (Tools > Update > Update All /
+    # Ctrl+A,F9). Isi ini hanya tampil SEBELUM update, lalu diganti oleh daftar
+    # sungguhan saat diperbarui — jadi tidak pernah muncul di PDF final. Memakai
+    # satu spasi (xml:space=preserve) agar tak terlihat namun run tidak kosong.
     placeholder = OxmlElement("w:t")
     placeholder.set(qn("xml:space"), "preserve")
-    placeholder.text = ""
+    placeholder.text = " "
     end = OxmlElement("w:fldChar")
     end.set(qn("w:fldCharType"), "end")
     r = run._r
@@ -390,18 +393,29 @@ def heading(doc, text, level=1):
 # --------------------------------------------------------------------------- #
 # Render tabel markdown
 # --------------------------------------------------------------------------- #
+# Melacak caption pertama tiap (bab, jenis) untuk reset penghitung SEQ per bab.
+_SEQ_RESET_SEEN: set = set()
+
+
 def add_caption(doc, kind, chap_no, text, gambar=False, keep_with_next=False):
     """Caption ber-SEQ otomatis: 'Tabel 2.<SEQ>' / 'Gambar 2.<SEQ>'.
 
-    `\\s 1` mereset nomor SEQ di tiap Heading 1 (per bab); prefiks nomor bab
-    ditulis literal. Field ini yang dikoleksi Daftar Tabel/Gambar (TOC \\c).
+    Prefiks nomor bab ('2.') ditulis literal; angka indeks berasal dari field
+    SEQ yang dikoleksi Daftar Tabel/Gambar (TOC \\c). Penghitung direset ke 1
+    pada caption PERTAMA tiap jenis di tiap bab memakai switch `\\r 1` — didukung
+    Word *dan* LibreOffice. (Switch `\\s 1` "reset per Heading 1" diabaikan
+    LibreOffice sehingga nomor menjadi kontinu 1..N lintas bab — itu sebabnya
+    pendekatan `\\r 1` dipakai di sini.)
     """
     p = doc.add_paragraph(style="Caption")
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     if keep_with_next:
         p.paragraph_format.keep_with_next = True
     p.add_run(f"{kind} {chap_no}.")
-    p._p.append(_fld_simple(f" SEQ {kind} \\* ARABIC \\s 1 "))
+    first_in_chapter = (chap_no, kind) not in _SEQ_RESET_SEEN
+    _SEQ_RESET_SEEN.add((chap_no, kind))
+    reset = " \\r 1" if first_in_chapter else ""
+    p._p.append(_fld_simple(f" SEQ {kind}{reset} \\* ARABIC "))
     txt = text.strip()
     if gambar and not txt.endswith("."):
         txt += "."
@@ -1054,6 +1068,7 @@ def set_update_fields_on_open(doc):
 # Main
 # --------------------------------------------------------------------------- #
 def main():
+    _SEQ_RESET_SEEN.clear()
     OUT_DIR.mkdir(exist_ok=True)
     doc = Document()
     setup_styles(doc)
