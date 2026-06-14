@@ -1032,6 +1032,27 @@ def build_lampiran(doc):
 
 
 # --------------------------------------------------------------------------- #
+# Auto-update fields on open
+# --------------------------------------------------------------------------- #
+def set_update_fields_on_open(doc):
+    """Tandai dokumen agar LibreOffice/Word memperbarui seluruh field & indeks
+    (Daftar Isi/Tabel/Gambar, nomor SEQ) saat berkas dibuka — tanpa perlu
+    menekan Ctrl+A lalu F9 secara manual.
+
+    Menyisipkan <w:updateFields w:val="true"/> di awal word/settings.xml.
+    LibreOffice akan menampilkan dialog konfirmasi "Update all links?/indexes"
+    saat membuka; pilih Ya. Word memperbaruinya otomatis.
+    """
+    settings = doc.settings.element
+    # hindari duplikasi bila dijalankan ulang
+    for el in settings.findall(qn("w:updateFields")):
+        settings.remove(el)
+    upd = OxmlElement("w:updateFields")
+    upd.set(qn("w:val"), "true")
+    settings.insert(0, upd)
+
+
+# --------------------------------------------------------------------------- #
 # Main
 # --------------------------------------------------------------------------- #
 def main():
@@ -1093,6 +1114,7 @@ def main():
     build_daftar_pustaka(doc)
     build_lampiran(doc)
 
+    set_update_fields_on_open(doc)
     doc.save(OUT_FILE)
     print(f"✓ Naskah tersimpan: {OUT_FILE.relative_to(ROOT)}")
     print(f"  Bab termuat   : {sum(1 for c in CHAPTERS if c[0])} / {len(CHAPTERS)}")
