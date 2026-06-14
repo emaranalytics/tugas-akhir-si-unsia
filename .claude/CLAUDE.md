@@ -130,11 +130,14 @@ UNSIA-formatted `.docx` by a generator script. **The `.docx` is generated, not h
 - **Daftar Pustaka** dikonsolidasi jadi satu daftar IEEE global (24 referensi unik, urut kemunculan pertama Bab I→V) di konstanta `REFERENCES`. Sitasi in-text `[n]` di tiap bab **sudah dinomori ulang** ke skema global (per-chapter "Referensi Bab X" dihapus). Jangan tambah sitasi tanpa update `REFERENCES` + renumber.
 - **Lampiran A–E** terisi konten nyata (dibaca saat build): A=`src/tool_registry_eval/registry.py`, B=sampel dari `lampiran/dataset-100-query.json` (100 kueri, 50/30/20), C=`outputs/gemini-native-v2/summary.csv` + `statistical_tests.csv`, D=`src/tool_registry_eval/measure.py`, E=instruksi/placeholder bukti Turnitin (langkah eksternal user, ≤30%).
 
-**Build the compiled draft:**
+**Build the compiled draft:** (full steps + LibreOffice finalisation in `BUILD.md`)
 ```
 conda activate gradio   # needs python-docx + Pillow
 python tools/build_thesis_docx.py   # → draft/Draft-Tugas-Akhir-Muhammadridwan.docx
 ```
+- The `.docx` carries `<w:updateFields val="true"/>` so DAFTAR ISI/TABEL/GAMBAR + SEQ
+  numbers refresh on open. LibreOffice: confirm the update dialog, or **Tools → Update →
+  Update All** (the LibreOffice equivalent of Word's Ctrl+A→F9). Run it before PDF export.
 - Reads `bab/*.md` + front-matter metadata (cover w/ `reference/logo.png`, orisinalitas,
   pengesahan, abstrak placeholder, kata pengantar, daftar isi/tabel/gambar as Word TOC fields).
 - To add a finished bab: write its `.md`, set its filename in the `CHAPTERS` list (replace `None`), re-run.
