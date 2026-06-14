@@ -121,7 +121,7 @@ UNSIA-formatted `.docx` by a generator script. **The `.docx` is generated, not h
 |-----|------|--------|
 | Bab I — Pendahuluan | `bab/bab-1-pendahuluan.md` | ✅ Draft (rumusan masalah in *pernyataan* form per pedoman) |
 | Bab II — Landasan Teori | `bab/bab-2-landasan-teori.md` | ✅ Draft (7 sub-bab, 23 IEEE refs, Tabel 2.1 penelitian terdahulu) |
-| Bab III — Implementasi Metode Usulan | — | 📋 Placeholder + outline |
+| Bab III — Implementasi Metode Usulan | `bab/bab-3-implementasi-metode.md` | ✅ Draft (6 sub-bab; Gambar 3.1–3.2, Tabel 3.1–3.4, Kode Program 3.1–3.4) |
 | Bab IV — Hasil dan Analisa | — | 📋 Placeholder + outline |
 | Bab V — Kesimpulan | — | 📋 Placeholder + outline |
 
@@ -150,6 +150,10 @@ python tools/build_thesis_docx.py   # → draft/Draft-Tugas-Akhir-Muhammadridwan
   (from chapter order); the `.Y` index comes from the SEQ field — number them sequentially in markdown.
 - python-docx can't embed SVG → figures must be **PNG** (rendered at high DPI).
 - matplotlib charts from `charts.py` (PNG @ 180 dpi) embed the same way for Bab IV.
+- Diagrams rendered so far: `alur-penelitian-dsr` (Bab II), `arsitektur-tool-registry` + `alur-eval-runner` (Bab III).
+- **Code listings:** fenced ```` ``` ```` blocks render as shaded monospace (Courier New 9pt, single-spacing,
+  `cantSplit`-style `keep_together` ≤30 lines). Caption line `Kode Program X.Y <Title>` placed **above** the
+  block renders centered (manual numbering, NOT a SEQ field — kept out of Daftar Tabel/Gambar).
 
 ## Relevant Files to Know
 

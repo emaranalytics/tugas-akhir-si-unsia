@@ -1,0 +1,21 @@
+flowchart LR
+    Q["Permintaan Pengguna<br/>teks, modul, peran, tier"] --> R
+    K[("Katalog ToolMeta<br/>30 / 100 / 300 tool")] -.-> R
+    subgraph R["registry_filter()"]
+        direction TB
+        F1["1. Filter Modul<br/>tool.module sesuai query.modules"] --> F2["2. Filter Peran<br/>query.role ada di tool.roles"]
+        F2 --> F3["3. Filter Tier<br/>query.tier ada di tool.tiers"]
+        F3 --> F4["4. Skoring Kata Kunci<br/>+ Urut Prioritas + Hash Stabil"]
+        F4 --> F5["5. Budget Cap<br/>ambil 15 teratas"]
+    end
+    R --> V["Visible Tools<br/>maksimal 15"]
+    V --> D["FunctionDeclaration<br/>JSON Schema"]
+    D --> L["LLM Gemini 2.5 Flash Lite<br/>mode=ANY, temperature=0"]
+    L --> C(["Tool Terpilih"])
+
+    classDef stage fill:#1f3a93,stroke:#0d1b4c,color:#ffffff,stroke-width:1px;
+    classDef store fill:#0d6e4f,stroke:#06402b,color:#ffffff,stroke-width:1px;
+    classDef io fill:#7a3b8f,stroke:#3f1f4a,color:#ffffff,stroke-width:1px;
+    class F1,F2,F3,F4,F5 stage;
+    class K store;
+    class Q,V,D,L,C io;

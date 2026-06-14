@@ -1,0 +1,13 @@
+flowchart TD
+    A["Dataset 100 query + katalog tool skenario S1 / S2 / S3"] --> B{"Mode evaluasi"}
+    B -->|baseline| C["Seluruh tool katalog 30 / 100 / 300 ditampilkan ke LLM"]
+    B -->|registry| D["registry_filter() menyaring menjadi maksimal 15 tool"]
+    C --> E["LLM Gemini Native Function Calling &mdash; temperature=0, mode=ANY"]
+    D --> E
+    E --> F["Catat metrik tiap panggilan lalu simpan ke JSONL inkremental (resume-safe)"]
+    F --> H["summarize() + uji statistik: Wilcoxon, Cohen's d, CI 95%"]
+
+    classDef step fill:#1f3a93,stroke:#0d1b4c,color:#ffffff,stroke-width:1px;
+    classDef dec fill:#b8860b,stroke:#5c4406,color:#ffffff,stroke-width:1px;
+    class A,C,D,E,F,H step;
+    class B dec;

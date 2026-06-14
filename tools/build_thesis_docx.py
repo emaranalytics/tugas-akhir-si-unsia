@@ -56,19 +56,7 @@ META = {
 CHAPTERS = [
     ("bab-1-pendahuluan.md", "BAB I", "PENDAHULUAN", None),
     ("bab-2-landasan-teori.md", "BAB II", "LANDASAN TEORI", None),
-    (
-        None,
-        "BAB III",
-        "IMPLEMENTASI METODE USULAN",
-        [
-            "3.1 Analisis Sistem Eksisting",
-            "3.2 Perancangan Tool Registry",
-            "3.3 Perancangan Eval Framework",
-            "3.4 Implementasi Tool Registry",
-            "3.5 Implementasi Eval Runner",
-            "3.6 Setup Eksperimen",
-        ],
-    ),
+    ("bab-3-implementasi-metode.md", "BAB III", "IMPLEMENTASI METODE USULAN", None),
     (
         None,
         "BAB IV",
@@ -387,6 +375,43 @@ def add_image_centered(doc, rel_path, max_w_cm=12.0, max_h_cm=18.0):
     return p
 
 
+def _set_para_shading(p, fill="F2F2F2"):
+    """Beri warna latar (shading) pada paragraf via w:shd di pPr."""
+    pPr = p._p.get_or_add_pPr()
+    shd = OxmlElement("w:shd")
+    shd.set(qn("w:val"), "clear")
+    shd.set(qn("w:color"), "auto")
+    shd.set(qn("w:fill"), fill)
+    pPr.append(shd)
+
+
+def add_code_block(doc, code_lines):
+    """Render blok kode (fenced ```), monospace single-spacing dengan shading.
+
+    Tidak terbelah antar-halaman bila ≤ 30 baris; selebihnya dibiarkan mengalir.
+    """
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    pf = p.paragraph_format
+    pf.line_spacing_rule = WD_LINE_SPACING.SINGLE
+    pf.left_indent = Cm(0.5)
+    pf.right_indent = Cm(0.2)
+    pf.space_before = Pt(6)
+    pf.space_after = Pt(6)
+    pf.keep_together = len(code_lines) <= 30
+    _set_para_shading(p, "F2F2F2")
+    for idx, raw in enumerate(code_lines):
+        # ganti tab dengan 4 spasi, pertahankan indentasi awal baris
+        text = raw.replace("\t", "    ")
+        run = p.add_run(text)
+        run.font.name = "Courier New"
+        run.font.size = Pt(9)
+        _set_cell_east_asian(run)
+        if idx < len(code_lines) - 1:
+            run.add_break()
+    return p
+
+
 def render_table(doc, rows):
     """rows: list of list[str] sudah dipisah kolom (termasuk header)."""
     ncol = len(rows[0])
@@ -415,6 +440,8 @@ def render_table(doc, rows):
 _TABLE_ROW_RE = re.compile(r"^\s*\|(.+)\|\s*$")
 _SEP_ROW_RE = re.compile(r"^\s*\|?[\s:|-]+\|?\s*$")
 _CAPTION_RE = re.compile(r"^(Tabel|Gambar)\s+\d", re.IGNORECASE)
+_CODE_CAPTION_RE = re.compile(r"^Kode Program\s+\d+\.\d+\s", re.IGNORECASE)
+_FENCE_RE = re.compile(r"^```")
 
 
 def split_table_row(line):
@@ -441,6 +468,32 @@ def render_markdown(doc, md_text, captions, chap_no):
             continue
 
         if stripped == "---":
+            i += 1
+            continue
+
+        # blok kode berpagar ```
+        if _FENCE_RE.match(stripped):
+            i += 1
+            code_lines: list[str] = []
+            while i < n and not _FENCE_RE.match(lines[i].strip()):
+                code_lines.append(lines[i])
+                i += 1
+            i += 1  # lewati pagar penutup
+            # buang baris kosong di ujung blok
+            while code_lines and not code_lines[0].strip():
+                code_lines.pop(0)
+            while code_lines and not code_lines[-1].strip():
+                code_lines.pop()
+            if code_lines:
+                add_code_block(doc, code_lines)
+            continue
+
+        # caption listing kode: "Kode Program X.Y ..." (manual, tanpa SEQ)
+        if _CODE_CAPTION_RE.match(stripped):
+            p = doc.add_paragraph(style="Caption")
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p.paragraph_format.keep_with_next = True
+            add_runs(p, stripped)
             i += 1
             continue
 
